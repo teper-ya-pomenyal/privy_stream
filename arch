@@ -1,0 +1,171 @@
+
+//
+Users(User Service) {
+    user_id UUID PK
+    user_name STRING
+    password_hash STRING
+    birth_date DATETIME
+    created_at DATETIME
+}
+
+
+//
+Artists(Catalog Service) {
+    id_artist UUID PK
+    artist_name STRING
+    created_at DATETIME
+}
+
+//
+Albums(CatalogService) {
+    id_album UUID PK
+    id_artist UUID FK
+    album_name STRING
+    created_at DATETIME
+}
+
+//
+Tracks(Catalog Service) {
+    id_track UUID PK
+    track_name STRING
+    id_artist UUID FK
+    id_album UUID FK
+    explicit BOOLEAN
+    path STRING
+    created_at DATETIME
+}
+
+//
+Playlists(Catalog Service) {
+    id_playlist UUID PK
+    playlist_name STRING
+    id_owner UUID (NOT FK, OTHER DB)
+    created_at DATETIME
+}
+
+
+//
+PlaylistTrack(CatalogService) {
+    (PRIMARY KEY id_playlist + id_track)
+    id_playlist UUID PK
+    id_track UUID PK
+    position INTEGER
+    added_at DATETIME
+}
+
+
+
+streaming-project/
+├── api/                              # Внешний REST API (для клиента)
+│   └── openapi.yaml                  # Спецификация OpenAPI: все эндпоинты, схемы, ошибки
+│
+├── proto/                            # Внутренние gRPC-контракты (между сервисами)
+│   ├── catalog/
+│   │   └── v1/
+│   │       └── catalog.proto         # Catalog Service: GetTrackByID, TrackExists и т.д.
+│   └── user/
+│       └── v1/
+│           └── user.proto            # User Service: GetUserByID, ValidateToken (если нужно)
+│
+├── gateway/                          # API Gateway (единая точка входа)
+│   ├── go.mod
+│   ├── go.sum
+│   ├── cmd/
+│   │   └── main.go                   # запуск Gateway
+│   ├── internal/
+│   │   ├── config/                   # порт, адреса сервисов, секреты
+│   │   ├── middleware/               # auth, logging, recovery, CORS, rate limiting
+│   │   ├── handler/                  # маршрутизация запросов к сервисам
+│   │   └── client/                   # gRPC/HTTP клиенты для User, Catalog, Streaming
+│   ├── Dockerfile
+│   └── README.md
+│
+├── user-service/                     # Сервис пользователей и аутентификации
+│   ├── go.mod
+│   ├── go.sum
+│   ├── cmd/
+│   │   └── main.go
+│   ├── internal/
+│   │   ├── domain/
+│   │   │   ├── user.go               # структура User
+│   │   │   └── repository.go         # интерфейс UserRepository
+│   │   ├── usecase/
+│   │   │   ├── register.go           # бизнес-логика регистрации
+│   │   │   └── login.go              # бизнес-логика входа
+│   │   ├── delivery/
+│   │   │   ├── http/                 # REST handlers (POST /register, /login)
+│   │   │   │   ├── handler.go
+│   │   │   │   └── dto.go            # структуры запросов/ответов
+│   │   │   └── grpc/                 # gRPC server (если нужен для других сервисов)
+│   │   ├── repository/
+│   │   │   └── postgres/             # реализация UserRepository для PostgreSQL
+│   │   │       └── user_repo.go
+│   │   ├── jwt/                      # генерация и проверка JWT
+│   │   │   └── manager.go
+│   │   └── config/
+│   │       └── config.go
+│   ├── migrations/
+│   │   ├── 000001_create_users_table.up.sql
+│   │   └── 000001_create_users_table.down.sql
+│   ├── Dockerfile
+│   └── README.md
+│
+├── catalog-service/                  # Сервис каталога (треки, артисты, альбомы, плейлисты)
+│   ├── go.mod
+│   ├── go.sum
+│   ├── cmd/
+│   │   └── main.go
+│   ├── internal/
+│   │   ├── domain/
+│   │   │   ├── track.go
+│   │   │   ├── artist.go
+│   │   │   ├── album.go
+│   │   │   ├── playlist.go
+│   │   │   ├── playlist_track.go
+│   │   │   └── repository.go         # интерфейсы репозиториев (CatalogRepository, PlaylistRepository)
+│   │   ├── usecase/
+│   │   │   ├── track_usecase.go      # GetTrack, ListTracks, SearchTracks
+│   │   │   ├── artist_usecase.go     # если нужны операции с артистами
+│   │   │   └── playlist_usecase.go   # CreatePlaylist, AddTrack и т.д.
+│   │   ├── delivery/
+│   │   │   ├── http/                 # REST handlers (для Gateway)
+│   │   │   └── grpc/                 # gRPC server (для Streaming Service и др.)
+│   │   ├── repository/
+│   │   │   ├── postgres/             # реализации для PostgreSQL
+│   │   │   └── cache/                # Redis-декоратор (если кэшируем)
+│   │   └── config/
+│   ├── migrations/
+│   │   ├── 000001_create_artists_table.up.sql / down.sql
+│   │   ├── 000002_create_tracks_table.up.sql / down.sql
+│   │   ├── 000003_create_playlists_table.up.sql / down.sql
+│   │   └── 000004_create_playlist_tracks_table.up.sql / down.sql
+│   ├── Dockerfile
+│   └── README.md
+│
+├── streaming-service/                # Сервис стриминга аудио
+│   ├── go.mod
+│   ├── go.sum
+│   ├── cmd/
+│   │   └── main.go
+│   ├── internal/
+│   │   ├── domain/
+│   │   │   └── storage.go            # интерфейс AudioStorage
+│   │   ├── usecase/
+│   │   │   └── stream.go             # логика: проверить трек через Catalog, отдать файл
+│   │   ├── delivery/
+│   │   │   └── http/                 # обработчик GET /stream/{trackID}
+│   │   ├── client/
+│   │   │   └── catalog_client.go     # gRPC-клиент к Catalog Service
+│   │   ├── storage/
+│   │   │   ├── local/                # реализация на основе локальной файловой системы
+│   │   │   └── minio/                # реализация для MinIO (если выберем S3)
+│   │   └── config/
+│   ├── Dockerfile
+│   └── README.md
+│
+├── docker-compose.yml                # все сервисы + Postgres (users, catalog) + Redis + Storage
+├── go.work                            # объединяет все модули
+├── README.md
+├── .gitignore
+├── .env.example
+└── Makefile                           # команды: make build, make test, make up

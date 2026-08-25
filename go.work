@@ -1,0 +1,8 @@
+go 1.26.5
+
+use (
+	./catalog_service
+	./gateway
+	./streaming_service
+	./user_service
+)
