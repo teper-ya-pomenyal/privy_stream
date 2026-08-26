@@ -1,0 +1,151 @@
+syntax = "proto3";
+package catalog.v1;
+option go_package = "privy_stream/proto/catalog/v1;catalogv1";
+
+service CatalogService {
+    rpc GetTrackByID(GetTrackByIDRequest) returns (GetTrackByIDResponse);
+    rpc GetArtistByID(GetArtistByIDRequest) returns (GetArtistByIDResponse);
+    rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse);
+    rpc TrackExists(TrackExistsRequest) returns (TrackExistsResponse);
+    rpc SearchTrack(SearchTrackRequest) returns (SearchTrackResponse);
+    rpc SearchArtist(SearchArtistRequest) returns (SearchArtistResponse);
+
+//     rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
+//     rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
+}
+
+// структуры для клиента
+message Track {
+    string track_uuid = 1;
+    string track_name = 2;
+    string artist_uuid = 3;
+    string artist_name = 4;
+    string album_uuid = 5;
+    string album_name = 6;
+    bool explicit = 7;
+    int32 duration_ms = 8;   
+} 
+
+message FullArtist {
+    string artist_name = 1;
+    repeated LightAlbum albums = 2;
+}
+
+message LightArtist {
+    string artist_uuid = 1;
+    string artist_name = 2;
+
+}
+
+message FullAlbum {
+    string album_name = 1;
+    string artist_name = 2;
+    string artist_uuid = 3;
+    repeated Track tracks = 4;
+    string created_at = 5;
+    string album_uuid = 6;
+}
+
+message LightAlbum {
+    string album_uuid = 1;
+    string album_name = 2;
+}
+
+// message Playlist {
+//     string playlist_uuid = 1;
+//     string playlist_name = 2;
+//     string owner_uuid = 3;
+//     string owner_name = 4;
+//     repeated Track tracks = 5;
+// }
+
+// Методы
+message GetTrackByIDRequest {
+    string track_uuid = 1;
+}
+
+
+// так как это будет использоваться только для стриминг сервиса,
+// удалил информацию, которая ему не нужна
+message GetTrackByIDResponse {
+    string path = 1;
+    int32 duration_ms = 2;
+}
+
+
+//
+message TrackExistsRequest {
+    string track_uuid = 1;
+}
+
+message TrackExistsResponse {
+    bool exists = 1;
+}
+
+
+//
+message SearchTrackResponse {
+    repeated Track tracks = 1;
+}
+
+message SearchTrackRequest {
+    string track_name = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+//
+message SearchArtistRequest {
+    string artist_name = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message SearchArtistResponse {
+    repeated LightArtist artists = 1;
+}
+
+
+/*
+message SearchAlbumRequest {
+    string album_name = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message SearchAlbumResponse {
+    repeated Album albums = 1;
+}
+
+
+//
+message SearchPlaylistRequest {
+    string playlist_name = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message SearchPlaylistResponse {
+    repeated Playlist playlists = 1;
+}*/
+
+
+//
+message GetArtistByIDRequest {
+    string artist_uuid = 1;
+}
+
+message GetArtistByIDResponse {
+    FullArtist artist = 1;
+}
+
+
+//
+message GetAlbumByIDRequest {
+    string album_uuid = 1;
+}
+
+message GetAlbumByIDResponse {
+    FullAlbum album = 1;
+}
+

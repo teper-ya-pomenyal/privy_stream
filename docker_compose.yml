@@ -1,0 +1,69 @@
+
+
+services:
+  postgres-users:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: 
+      - "5433:5432"
+    volumes:
+      - postgres_users_data:/var/lib/postgresql/data
+
+  postgres-catalog:
+    image: 
+      postgres:16
+    environment:
+      POSTGRES_DB: catalog_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_catalog_data:/var/lib/postgresql/data
+
+  redis_catalog_cash:
+    image: redis:7
+    command: redis-server --appendonly yes
+    ports:         
+      - "5435:6379"
+    volumes:
+      - redis_catalog_cash_data:/data
+  
+  redis_users_sessions:
+    image: redis:7
+    command: redis-server --appendonly yes
+    ports:         
+      - "5436:6379"
+    volumes:
+      - redis_users_sessions_data:/data
+  
+  catalog_service:
+    build:
+      context: .
+      dockerfile: catalog_service/Dockerfile
+  
+  gateway:
+    ports: 
+    - "8080:8080"
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+  streaming_service:
+    build:
+      context: .
+      dockerfile: streaming_service/Dockerfile
+  
+  user_service:
+    build:
+      context: .
+      dockerfile: user_service/Dockerfile
+
+volumes:
+  postgres_users_data:  
+  postgres_catalog_data: 
+  redis_catalog_cash_data:
+  redis_users_sessions_data:
+

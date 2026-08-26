@@ -14,6 +14,7 @@
 coverage.txt
 coverage.html
 coverage.out
+arch
 
 # Dependency directories
 # vendor/
