@@ -6,6 +6,7 @@ service CatalogService {
     rpc GetTrackByID(GetTrackByIDRequest) returns (GetTrackByIDResponse);
     rpc GetArtistByID(GetArtistByIDRequest) returns (GetArtistByIDResponse);
     rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse);
+    rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByUDResponse);
     rpc TrackExists(TrackExistsRequest) returns (TrackExistsResponse);
     rpc SearchTrack(SearchTrackRequest) returns (SearchTrackResponse);
     rpc SearchArtist(SearchArtistRequest) returns (SearchArtistResponse);
@@ -27,8 +28,9 @@ message Track {
 } 
 
 message FullArtist {
-    string artist_name = 1;
-    repeated LightAlbum albums = 2;
+    string artist_uuid = 1;
+    string artist_name = 2;
+    repeated LightAlbum albums = 3;
 }
 
 message LightArtist {
@@ -51,13 +53,13 @@ message LightAlbum {
     string album_name = 2;
 }
 
-// message Playlist {
-//     string playlist_uuid = 1;
-//     string playlist_name = 2;
-//     string owner_uuid = 3;
-//     string owner_name = 4;
-//     repeated Track tracks = 5;
-// }
+message Playlist {
+    string playlist_uuid = 1;
+    string playlist_name = 2;
+    string owner_uuid = 3;
+    string owner_name = 4;
+    repeated Track tracks = 5;
+}
 
 // Методы
 message GetTrackByIDRequest {
@@ -131,6 +133,14 @@ message SearchPlaylistResponse {
 
 
 //
+
+message GetPlaylistByIDRequest {
+    string playlist_uuid = 1;
+}
+message GetPlaylistByIDResponse {
+    Playlist playlist = 1;
+}
+
 message GetArtistByIDRequest {
     string artist_uuid = 1;
 }

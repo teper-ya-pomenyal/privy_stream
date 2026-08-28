@@ -1,0 +1,436 @@
+openapi: 3.0.3
+info:
+  title: Privy Stream API
+  version: 1.0.0
+  description: Внешний REST API Gateway для аудио-стримингового сервиса 
+servers:
+  - url: http://localhost:8080 
+
+paths:
+  /register:
+    post:
+      summary: Регистрация нового пользователя
+      operationId: registerUser
+      requestBody: 
+        required: true
+        content: 
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Невалидные данные запроса
+        '409':
+          description: Пользователь с таким именем уже существует
+  /login:
+    post:
+      summary: Авторизация пользователя
+      operationId: authUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Пользователь успешно авторизовался
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Невалидные данные запроса
+        '401':
+          description: Неверный логин или пароль
+  
+  /tracks/search:
+    get:
+      summary: Поиск треков по названию
+      operationId: searchTracks
+      parameters:
+        - name: track_name
+          in: query
+          required: true
+          schema: 
+            type: string
+          example: "Убийца карася"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description:  Список найденых треков
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+
+  /artists/search:
+    get:
+      summary: Поиск артистов по имени
+      operationId: searchArtists
+      parameters:
+        - name: artist_name
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "PlayBoyCalich"
+      responses:
+        '200':
+          description: Список найденых артистов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artists:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LightArtist'
+
+
+  /artists/{artist_id}:
+    get:
+      summary: Получить полную информацию об артисте(с альбомами)
+      operationId: getArtistById
+      parameters:
+        - name: artist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Полня информация об артисте
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/FullArtist'
+        '404':
+          description: Артист не найден
+     
+  /albums/{album_id}:
+    get: 
+      summary: Полная информация об альбоме
+      operationId: getAlbumById
+      parameters:
+        - name: album_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Полная информация об альбоме
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullAlbum'
+        '404':
+          description: Альбом не найден
+  
+  /playlists:
+    post:
+      summary: Создать плэйлист
+      operationId: createPlaylist
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              required:
+                - playlist_name
+              properties:
+                playlist_name: 
+                  type: string
+                  example: "Моя деревня"
+      responses:
+        '201':
+          description: Плейлист создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+        '401':
+          description: Не авторизован  
+            
+  /playlists/{playlist_id}:
+    get:
+      summary: Получить плейлист с треками
+      operationId: getPlaylistById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: playlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Плейлист с треками
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+        '403':
+          description: Плейлист принадлежит другому пользователю
+        '404':
+          description: Плейлист не найден
+  
+    delete:
+      summary: Удалить плейлист
+      operationId: deletePlaylist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: playlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Плейлист успешно удалён
+        '403':
+          description: Плейлист принадлежит другому пользователю
+        '404':
+          description: Плейлист не найден
+
+
+  /stream/{track_id}:
+    get:
+      summary: Стриминг аудио трека с поддержкой перемотки (HTTP Range)
+      operationId: streamTrack
+      parameters:
+        - name: track_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Range
+          in: header
+          required: false
+          schema:
+            type: string
+            example: "bytes=0-1023"
+          description: Запрос на часть файла — браузер шлёт его сам при перемотке
+      responses:
+        '200':
+          description: Трек отдан целиком (клиент не прислал Range)
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '206':
+          description: Отдана часть трека (ответ на Range-запрос)
+          headers:
+            Content-Range:
+              description: Диапазон отданных байт относительно полного размера файла
+              schema:
+                type: string
+                example: "bytes=0-1023/5242880"
+            Accept-Ranges:
+              description: Подтверждение, что сервер поддерживает Range-запросы
+              schema:
+                type: string
+                example: "bytes"
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Трек не найден (Streaming Service сверился с Catalog через TrackExists)
+        '416':
+          description: Запрошенный диапазон выходит за пределы размера файла  
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required:
+        - user_name
+        - password
+        - birth_date
+      properties:
+        user_name:
+          type: string
+          example: petr_gorelikov
+        password:
+          type: string
+          format: password
+          minLength: 8
+        birth_date:
+          type: string
+          format: date
+          example: "2001-05-04"
+
+    AuthRequest:
+      type: object
+      required:
+        - user_name
+        - password
+      properties:
+        user_name:
+          type: string
+          example: petr_gorelikov
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    Track:
+      type: object
+      properties:
+        track_uuid:
+          type: string
+          format: uuid
+        track_name:
+          type: string
+          example: "Убийца карася"
+        artist_uuid:
+          type: string
+          format: uuid
+        artist_name:
+          type: string
+          example: "PlayBoyCalich"
+        album_uuid:
+          type: string
+          format: uuid
+        album_name:
+          type: string
+          example: "Убийца карася"
+        explicit:
+          type: boolean
+        duration_ms:
+          type: integer
+
+    LightArtist:
+      type: object
+      properties:
+        artist_uuid:
+          type: string
+          format: uuid
+        artist_name:
+          type: string
+          example: "PlayBoyCalich"
+
+    FullArtist:
+      type: object
+      properties:
+        artist_uuid:
+          type: string
+          format: uuid
+        artist_name:
+          type: string
+          example: "PlayBoyCalich"
+        albums:
+          type: array
+          items: 
+            $ref: '#/components/schemas/LightAlbum'
+    
+    LightAlbum:
+      type: object
+      properties:
+        album_uuid:
+          type: string
+          format: uuid
+        album_name:
+          type: string
+          example: "Убийца карася"
+    
+    FullAlbum:
+      type: object
+      properties:
+        album_uuid:
+          type: string
+          format: uuid
+        album_name:
+          type: string
+          example: "Убийца карася"
+        artist_uuid:
+          type: string
+          format: uuid
+        artist_name:
+          type: string
+          example: "PlayBoyCalich"
+        created_at:
+          type: string
+          format: date
+          example: "2001-05-04"
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+
+    AuthResponse:
+      type: object
+      properties:
+        user_uuid:
+          type: string
+          format: uuid
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        birth_date:
+          type: string
+          format: date
+
+    Playlist:
+      type: object
+      properties:
+        playlist_uuid:
+          type: string
+          format: uuid
+        playlist_name:
+          type: string
+          example: "Плейлист для тренировки"
+        owner_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
