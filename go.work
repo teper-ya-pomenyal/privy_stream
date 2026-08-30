@@ -3,6 +3,7 @@ go 1.26.5
 use (
 	./catalog_service
 	./gateway
+	./jwtmanager
 	./streaming_service
 	./user_service
 )

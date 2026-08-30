@@ -1,3 +1,3 @@
-module github.com/petrlovlinka-stack/privy_stream/catalog_service
+module github.com/teper-ya-pomenyal/privy_stream/catalog_service
 
 go 1.26.5
