@@ -18,8 +18,17 @@ type LoginResult struct {
 }
 
 type LoginUseCase struct {
-	repo         domain.UsersRepository
-	tokenManager TokenManager
+	repo           domain.UsersRepository
+	tokenManager   TokenManager
+	sessionManager SessionStore
+}
+
+func NewLoginUseCase(repo domain.UsersRepository, tokenManager TokenManager, sessionManager SessionStore) *LoginUseCase {
+	return &LoginUseCase{
+		repo:           repo,
+		tokenManager:   tokenManager,
+		sessionManager: sessionManager,
+	}
 }
 
 func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*LoginResult, error) {
@@ -31,7 +40,7 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 	if err != nil {
 		return nil, domain.ErrInvalidCredentials
 	}
-	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID.String())
+	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -39,12 +48,16 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 	if err != nil {
 		return nil, err
 	}
-
-	return &LoginResult{
+	loginResult := &LoginResult{
 		UUID:         user.UserUUID.String(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		BirthDate:    user.BirthDate,
 		CreatedAt:    user.CreatedAt,
-	}, nil
+	}
+	err = l.sessionManager.Save(ctx, refreshToken, user.UserUUID)
+	if err != nil {
+		return nil, err
+	}
+	return loginResult, nil
 }

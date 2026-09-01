@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type Manager struct {
@@ -18,9 +19,9 @@ func New(privateKey *rsa.PrivateKey, accessTTL time.Duration) *Manager {
 	return &Manager{privateKey: privateKey, accessTTL: accessTTL}
 }
 
-func (m *Manager) NewAccessToken(userUUID string) (string, error) {
+func (m *Manager) NewAccessToken(userUUID uuid.UUID) (string, error) {
 	claims := jwt.RegisteredClaims{
-		Subject:   userUUID,
+		Subject:   userUUID.String(),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.accessTTL)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}

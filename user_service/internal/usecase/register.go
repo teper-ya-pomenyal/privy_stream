@@ -10,8 +10,17 @@ import (
 )
 
 type RegisterUseCase struct {
-	repo         domain.UsersRepository
-	tokenManager TokenManager
+	repo           domain.UsersRepository
+	tokenManager   TokenManager
+	sessionManager SessionStore
+}
+
+func NewRegisterUseCase(repo domain.UsersRepository, tokenManager TokenManager, sessionManager SessionStore) *RegisterUseCase {
+	return &RegisterUseCase{
+		repo:           repo,
+		tokenManager:   tokenManager,
+		sessionManager: sessionManager,
+	}
 }
 
 func (r *RegisterUseCase) Register(ctx context.Context, userName, password, birthDate string) (*LoginResult, error) {
@@ -44,7 +53,7 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password, birt
 		return nil, err
 	}
 
-	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID.String())
+	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +67,10 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password, birt
 		RefreshToken: refreshToken,
 		BirthDate:    newUser.BirthDate,
 		CreatedAt:    newUser.CreatedAt,
+	}
+	err = r.sessionManager.Save(ctx, refreshToken, newUser.UserUUID)
+	if err != nil {
+		return nil, err
 	}
 	return resultLogin, nil
 }
