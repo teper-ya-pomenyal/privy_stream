@@ -32,5 +32,6 @@ message LoginResponse {
     string user_uuid = 1;
     string access_token = 2;
     string refresh_token = 3;
-    string birth_date = 4;
+    string created_at = 4;
+    string birth_date = 5;
 }

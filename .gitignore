@@ -122,3 +122,6 @@ temp/
 # Go specific
 *.prof
 *.pprof
+
+# Secrets
+*.pem

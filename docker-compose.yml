@@ -3,16 +3,16 @@ services:
   postgres-users:
     image: postgres:16
     environment:
-      POSTGRES_DB: users_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports: 
+      POSTGRES_DB: ${POSTGRES_DB_USERS}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
       - "5433:5432"
     volumes:
       - postgres_users_data:/var/lib/postgresql/data
 
   postgres-catalog:
-    image: 
+    image:
       postgres:16
     environment:
       POSTGRES_DB: catalog_db
@@ -23,45 +23,61 @@ services:
     volumes:
       - postgres_catalog_data:/var/lib/postgresql/data
 
-  redis_catalog_cash:
+  redis_catalog_cache:
     image: redis:7
     command: redis-server --appendonly yes
-    ports:         
+    ports:
       - "5435:6379"
     volumes:
-      - redis_catalog_cash_data:/data
-  
+      - redis_catalog_cache_data:/data
+
   redis_users_sessions:
     image: redis:7
-    command: redis-server --appendonly yes
-    ports:         
+    command: redis-server --appendonly yes --requirepass ${USER_CACHE_PASSWORD}
+    ports:
       - "5436:6379"
     volumes:
       - redis_users_sessions_data:/data
-  
+
   catalog_service:
     build:
       context: .
       dockerfile: catalog_service/Dockerfile
-  
+
   gateway:
-    ports: 
+    ports:
     - "8080:8080"
     build:
       context: .
       dockerfile: gateway/Dockerfile
+
   streaming_service:
     build:
       context: .
       dockerfile: streaming_service/Dockerfile
-  
+
   user_service:
+    enviroment:
+      DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-users:5432/${POSTGRES_DB_USERS?sslmode=disable"
+      USER_CACHE_ADDRESS: ${USER_CACHE_ADDRESS}
+      USER_CACHE_PASSWORD: ${USER_CACHE_PASSWORD}
+      USER_CACHE_NUMBER: ${USER_CACHE_NUMBER}
+      USER_CACHE_POOL_SIZE: ${USER_CACHE_POOL_SIZE}
+      USER_CACHE_MIN_IDLE_CONNS: ${USER_CACHE_MIN_IDLE_CONNS}
+      USER_CACHE_DIAL_TIMEOUT: ${USER_CACHE_DIAL_TIMEOUT}
+      USER_CACHE_READ_TIMEOUT: ${USER_CACHE_READ_TIMEOUT}
+      USER_CACHE_WRITE_TIMEOUT: ${USER_CACHE_DIAL_TIMEOUT}
+      TTL_REFRESH_TIME: ${TTL_REFRESH_TIME}
+      TTL_ACCESS_TIME: ${TTL_ACCESS_TIME}
+      PRIVATE_KEY_PATH: ${PRIVATE_KEY_PATH}
     build:
       context: .
       dockerfile: user_service/Dockerfile
+    volumes:
+      - ./user_service/keys:/app/keys
 
 volumes:
-  postgres_users_data:  
-  postgres_catalog_data: 
-  redis_catalog_cash_data:
+  postgres_users_data:
+  postgres_catalog_data:
+  redis_catalog_cache_data:
   redis_users_sessions_data:

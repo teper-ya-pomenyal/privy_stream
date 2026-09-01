@@ -29,9 +29,9 @@ func (m *Manager) NewAccessToken(userUUID string) (string, error) {
 }
 
 func (m *Manager) NewRefreshToken() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
+	randBytes := make([]byte, 32)
+	if _, err := rand.Read(randBytes); err != nil {
 		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(bytes), nil
+	return base64.URLEncoding.EncodeToString(randBytes), nil
 }
