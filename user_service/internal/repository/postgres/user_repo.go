@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/config"
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/domain"
 )
 
@@ -15,8 +16,8 @@ type UsersPostgresRepository struct {
 	conn *sqlx.DB
 }
 
-func NewUsersPostgresRepository(dsn string) (*UsersPostgresRepository, error) {
-	db, err := sqlx.Connect("pgx", dsn)
+func NewUsersPostgresRepository(cfg *config.UserDBConfig) (*UsersPostgresRepository, error) {
+	db, err := sqlx.Connect("pgx", cfg.DSN)
 	if err != nil {
 		return nil, err
 	}

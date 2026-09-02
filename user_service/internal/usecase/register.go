@@ -23,8 +23,7 @@ func NewRegisterUseCase(repo domain.UsersRepository, tokenManager TokenManager, 
 	}
 }
 
-func (r *RegisterUseCase) Register(ctx context.Context, userName, password, birthDate string) (*LoginResult, error) {
-
+func (r *RegisterUseCase) Register(ctx context.Context, userName, password string, birthDate time.Time) (*LoginResult, error) {
 	ok, err := r.repo.UserAlreadyExists(ctx, userName)
 	if err != nil {
 		return nil, err

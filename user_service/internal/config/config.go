@@ -8,21 +8,27 @@ import (
 )
 
 type Config struct {
+	Port           string
 	UserDB         *UserDBConfig
 	UserCacheDB    *UserDBCacheConfig
 	TTLRefresh     time.Duration
+	TTLAccess      time.Duration
 	PrivateKeyPath string
 }
 
 func LoadConfig() *Config {
 
 	ttlRefresh := getIntEnvOrDefault("TTL_REFRESH_TIME", 604800)
+	ttlAccess := getIntEnvOrDefault("TTL_ACCESS_TIME", 900)
 
+	port := mustGetEnv("PORT")
 	privateKey := mustGetEnv("PRIVATE_KEY_PATH")
 	return &Config{
+		Port:           port,
 		UserDB:         NewUserDBConfig(),
 		UserCacheDB:    NewUserDBCacheConfig(),
 		TTLRefresh:     time.Duration(ttlRefresh) * time.Second,
+		TTLAccess:      time.Duration(ttlAccess) * time.Second,
 		PrivateKeyPath: privateKey,
 	}
 }

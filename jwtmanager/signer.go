@@ -15,7 +15,7 @@ type Manager struct {
 	accessTTL  time.Duration
 }
 
-func New(privateKey *rsa.PrivateKey, accessTTL time.Duration) *Manager {
+func NewManager(privateKey *rsa.PrivateKey, accessTTL time.Duration) *Manager {
 	return &Manager{privateKey: privateKey, accessTTL: accessTTL}
 }
 

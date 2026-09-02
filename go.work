@@ -4,6 +4,7 @@ use (
 	./catalog_service
 	./gateway
 	./jwtmanager
+	./proto
 	./streaming_service
 	./user_service
 )

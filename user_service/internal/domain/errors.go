@@ -7,4 +7,5 @@ var (
 	ErrInvalidCredentials   = errors.New("invalid credentials")
 	ErrUserAlreadyExists    = errors.New("user already exists")
 	ErrRefreshTokenNotFound = errors.New("refresh token not found")
+	ErrInvalidDate          = errors.New("invalid date")
 )
