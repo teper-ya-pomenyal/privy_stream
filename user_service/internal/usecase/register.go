@@ -35,15 +35,12 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 	if err != nil {
 		return nil, err
 	}
-	t, err := time.Parse(time.DateOnly, birthDate)
-	if err != nil {
-		return nil, err
-	}
+
 	newUser := &domain.User{
 		UserUUID:     uuid.New(),
 		UserName:     userName,
 		PasswordHash: string(hashPassword),
-		BirthDate:    t,
+		BirthDate:    birthDate,
 		CreatedAt:    time.Now(),
 	}
 
