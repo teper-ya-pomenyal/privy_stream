@@ -1,8 +1,11 @@
 FROM golang:1.26.5 AS builder
 WORKDIR /app
-COPY catalog_service/go.mod catalog_service/go.sum ./
+COPY go.work go.work.sum ./
+COPY user_service/go.mod user_service/go.sum ./user_service/
 COPY proto/ ./proto/
-COPY catalog_service/ ./
+COPY jwtmanager/ ./jwtmanager/
+COPY user_service/ ./user_service/
+WORKDIR /app/user_service
 RUN go build -o /app/bin/server ./cmd/server
 
 FROM alpine:3.20

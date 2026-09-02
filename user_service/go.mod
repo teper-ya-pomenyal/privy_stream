@@ -7,10 +7,16 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/redis/go-redis/v9 v9.22.0
-	github.com/teper-ya-pomenyal/privy_stream v0.0.0-20260902132554-63e1ac9a785c
 	github.com/teper-ya-pomenyal/privy_stream/jwtmanager v0.0.0-20260830100439-1ca989f99171
-	golang.org/x/crypto v0.55.0
+	github.com/teper-ya-pomenyal/privy_stream/proto v0.0.0-00010101000000-000000000000
+	golang.org/x/crypto v0.56.0
+	google.golang.org/grpc v1.83.2
+	google.golang.org/protobuf v1.36.11
 )
+
+replace github.com/teper-ya-pomenyal/privy_stream/jwtmanager => ../jwtmanager
+
+replace github.com/teper-ya-pomenyal/privy_stream/proto => ../proto
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -25,6 +31,4 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
-	google.golang.org/grpc v1.83.2 // indirect
-	google.golang.org/protobuf v1.36.12 // indirect
 )

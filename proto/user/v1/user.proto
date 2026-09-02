@@ -1,7 +1,7 @@
 syntax = "proto3";
 package user.v1;
 import "google/protobuf/timestamp.proto";
-option go_package = "privy_stream/proto/user/v1;userv1";
+option go_package = "github.com/teper-ya-pomenyal/privy_stream/proto/user/v1;userv1";
 
 service UserService{
     rpc Register(RegisterRequest) returns (RegisterResponse);

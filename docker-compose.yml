@@ -57,8 +57,9 @@ services:
       dockerfile: streaming_service/Dockerfile
 
   user_service:
-    enviroment:
-      DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-users:5432/${POSTGRES_DB_USERS?sslmode=disable"
+    environment:
+      PORT: ${PORT}
+      DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-users:5432/${POSTGRES_DB_USERS}?sslmode=disable"
       USER_CACHE_ADDRESS: ${USER_CACHE_ADDRESS}
       USER_CACHE_PASSWORD: ${USER_CACHE_PASSWORD}
       USER_CACHE_NUMBER: ${USER_CACHE_NUMBER}
