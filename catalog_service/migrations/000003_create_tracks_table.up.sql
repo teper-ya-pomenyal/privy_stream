@@ -4,5 +4,8 @@ CREATE TABLE tracks (
     artist_id UUID NOT NULL REFERENCES artists(artist_id),
     album_id UUID NOT NULL REFERENCES albums(album_id),
     explicit BOOLEAN NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    path TEXT NOT NULL,
+    duration_ms TIMESTAMPTZ NOT NULL
+    listened INTEGER
 );
