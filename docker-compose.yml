@@ -32,13 +32,30 @@ services:
     image:
       postgres:16
     environment:
-      POSTGRES_DB: catalog_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB_CATALOG:-catalog_db}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5434:5432"
     volumes:
       - postgres_catalog_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_CATALOG:-catalog_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  catalog_service_migrate:
+    image: migrate/migrate:v4.17.1
+    volumes:
+      - ./catalog_service/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-catalog:5432/${POSTGRES_DB_CATALOG:-catalog_db}?sslmode=disable"
+      - "up"
+    depends_on:
+      postgres-catalog:
+        condition: service_healthy
 
   redis_catalog_cache:
     image: redis:7
@@ -60,6 +77,13 @@ services:
     build:
       context: .
       dockerfile: catalog_service/Dockerfile
+    depends_on:
+      postgres-catalog:
+        condition: service_healthy
+      redis_catalog_cache:
+        condition: service_started
+      catalog_service_migrate:
+        condition: service_completed_successfully
 
   gateway:
     environment:

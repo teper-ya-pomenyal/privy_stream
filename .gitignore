@@ -62,3 +62,8 @@ temp/
 
 # Secrets
 private.pem
+
+
+
+postman
+.postman
