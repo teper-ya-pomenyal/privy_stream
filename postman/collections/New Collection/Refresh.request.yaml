@@ -1,0 +1,8 @@
+$kind: http-request
+description: ""
+url: localhost:8080/refresh
+method: POST
+body:
+  type: json
+  content: '{"refresh_token": "pBchtsFKZcpRaegPxZKwyg1tFFV3E2HtxBsuCHvd-vs="}'
+order: 4343706561834851

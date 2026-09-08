@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/domain"
+	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,16 +26,30 @@ func NewRegisterUseCase(repo domain.UsersRepository, tokenManager TokenManager, 
 }
 
 func (r *RegisterUseCase) Register(ctx context.Context, userName, password string, birthDate time.Time) (*LoginResult, error) {
+	// validate param
+	err := utils.ValidateUsername(userName)
+	if err != nil {
+		return &LoginResult{}, err
+	}
+	err = utils.ValidatePassword(password)
+	if err != nil {
+		return &LoginResult{}, err
+	}
+	err = utils.ValidateIncomingDate(birthDate)
+	if err != nil {
+		return &LoginResult{}, err
+	}
+
 	ok, err := r.repo.UserAlreadyExists(ctx, userName)
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
 	if ok {
-		return nil, domain.ErrUserAlreadyExists
+		return &LoginResult{}, domain.ErrUserAlreadyExists
 	}
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10) //установил дефолтное значение для ясности - какое колличество рацндов хэширования.
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
 
 	newUser := &domain.User{
@@ -46,16 +62,18 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 
 	err = r.repo.AddUser(ctx, newUser)
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
+
+	//make session
 
 	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID)
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
 	refreshToken, err := r.tokenManager.NewRefreshToken()
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
 	resultLogin := &LoginResult{
 		UUID:         newUser.UserUUID.String(),
@@ -66,7 +84,7 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 	}
 	err = r.sessionManager.Save(ctx, refreshToken, newUser.UserUUID)
 	if err != nil {
-		return nil, err
+		return &LoginResult{}, err
 	}
 	return resultLogin, nil
 }

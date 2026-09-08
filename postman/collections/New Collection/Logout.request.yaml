@@ -1,0 +1,12 @@
+$kind: http-request
+description: ""
+url: localhost:8080/logout
+method: POST
+body:
+  type: json
+  content: '{"refresh_token": "KumK2gtzjz5SDiQT0ubVlmy8j8FzzImA-TRe0lKKRp8="}'
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiNjYxZjAxMS05OWRhLTQwN2MtOWQ1MC05Y2VhODNlMjM2MjMiLCJleHAiOjE3ODg2NTEwMzMsImlhdCI6MTc4ODY1MDEzM30.JTClwrpxVZ-3sMjNBCxHCTSb0x2xekNzLmoKeRfNwMf-6CERrIjZVFhy85h5MGJN93P1S0tQY6Om7G0k7ga9gG2-g7sYh3duFVB8fqe5WEFd7sx1VRkVdmlzFeQOnk1pGAiNDzIvUyhWDljOVnMv461FK22E7YzDJz9HaU6P59-CNScfAhxzaqp3sELNXUQ31OvOBNuvSJFN2Iq3LLUjE--1CR2miBOnnMfCmnofawb5i-pxnKB_PEJjC_O7ME6guEPWfwdA8SOwSPZ4qvR4gb9ctFYzNlpKSU13fgSUrj19RGgOcYbsMSUV7wsnEW42sihikMIi5acZtR1Fvs5P8Q
+order: 4235046426556634

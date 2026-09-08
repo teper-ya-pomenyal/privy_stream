@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	userCache, err := redis.NewRedisSessionStore(cacheDBConfig, time.Duration(time.Second*5))
+	userCache, err := redis.NewRedisSessionStore(cacheDBConfig, cfg.TTLRefresh)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,8 +51,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	grpcServer := grpc.NewServer()
 
+	interceptors := grpc.ChainUnaryInterceptor(handler.RecoveryInterceptor(), handler.LoggingInterceptor())
+	grpcServer := grpc.NewServer(interceptors)
 	userHandler := handler.NewUserGRPCHandler(login, register, refresh, logout)
 
 	userv1.RegisterUserServiceServer(grpcServer, userHandler)

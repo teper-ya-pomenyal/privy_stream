@@ -36,7 +36,7 @@ func LoadConfig() *Config {
 func mustGetEnv(key string) string {
 	v := os.Getenv(key)
 	if v == "" {
-		log.Fatalf("отсутствует необходимая переменная окружения: %s", key)
+		log.Fatalf("missing required environment variable: %s", key)
 	}
 	return v
 }
@@ -45,7 +45,7 @@ func mustGetIntEnv(key string) int {
 	strParam := mustGetEnv(key)
 	intParam, err := strconv.Atoi(strParam)
 	if err != nil {
-		log.Fatalf("ошибка преобразования переменной %s в число: %s", key, err)
+		log.Fatalf("failed to convert variable %s to a number: %s", key, err)
 	}
 	return intParam
 }
@@ -57,7 +57,7 @@ func getIntEnvOrDefault(key string, defaultVal int) int {
 	}
 	intParam, err := strconv.Atoi(v)
 	if err != nil {
-		log.Fatalf("ошибка преобразования переменной %s в число: %s", key, err)
+		log.Fatalf("failed to convert variable %s to a number: %s", key, err)
 	}
 	return intParam
 }

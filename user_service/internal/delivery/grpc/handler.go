@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"errors"
 
 	userv1 "github.com/teper-ya-pomenyal/privy_stream/proto/user/v1"
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/domain"
@@ -35,6 +34,15 @@ func NewUserGRPCHandler(
 }
 
 func (h *UserGRPCHandler) Login(ctx context.Context, req *userv1.LoginRequest) (*userv1.LoginResponse, error) {
+
+	if req.UserName == "" {
+		return &userv1.LoginResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
+
+	if req.Password == "" {
+		return &userv1.LoginResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
+
 	res, err := h.loginUseCase.Login(ctx, req.UserName, req.Password)
 	if err != nil {
 		return nil, mapDomainError(err)
@@ -48,9 +56,18 @@ func (h *UserGRPCHandler) Login(ctx context.Context, req *userv1.LoginRequest) (
 }
 
 func (h *UserGRPCHandler) Register(ctx context.Context, req *userv1.RegisterRequest) (*userv1.RegisterResponse, error) {
-	if req.BirthDate == nil {
-		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidDate.Error())
+	if req.UserName == "" {
+		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
 	}
+
+	if req.Password == "" {
+		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
+
+	if req.BirthDate == nil {
+		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidDate.Error())
+	}
+
 	res, err := h.registerUseCase.Register(ctx, req.UserName, req.Password, req.BirthDate.AsTime())
 	if err != nil {
 		return nil, mapDomainError(err)
@@ -64,6 +81,9 @@ func (h *UserGRPCHandler) Register(ctx context.Context, req *userv1.RegisterRequ
 }
 
 func (h *UserGRPCHandler) Refresh(ctx context.Context, req *userv1.RefreshRequest) (*userv1.RefreshResponse, error) {
+	if req.RefreshToken == "" {
+		return &userv1.RefreshResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
 	res, err := h.refreshUseCase.Refresh(ctx, req.RefreshToken)
 	if err != nil {
 		return nil, mapDomainError(err)
@@ -75,25 +95,12 @@ func (h *UserGRPCHandler) Refresh(ctx context.Context, req *userv1.RefreshReques
 }
 
 func (h *UserGRPCHandler) Logout(ctx context.Context, req *userv1.LogoutRequest) (*userv1.LogoutResponse, error) {
+	if req.RefreshToken == "" {
+		return &userv1.LogoutResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
 	err := h.logoutUseCase.Logout(ctx, req.RefreshToken)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
 	return &userv1.LogoutResponse{}, nil
-}
-
-// errors mapping
-func mapDomainError(err error) error {
-	switch {
-	case errors.Is(err, domain.ErrInvalidCredentials):
-		return status.Error(codes.Unauthenticated, err.Error())
-	case errors.Is(err, domain.ErrUserNotFound):
-		return status.Error(codes.Unauthenticated, err.Error())
-	case errors.Is(err, domain.ErrUserAlreadyExists):
-		return status.Error(codes.AlreadyExists, err.Error())
-	case errors.Is(err, domain.ErrRefreshTokenNotFound):
-		return status.Error(codes.Unauthenticated, err.Error())
-	default:
-		return status.Error(codes.Internal, "internal error")
-	}
 }

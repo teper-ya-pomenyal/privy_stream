@@ -10,6 +10,23 @@ services:
       - "5433:5432"
     volumes:
       - postgres_users_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_USERS}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user_service_migrate:
+    image: migrate/migrate:v4.17.1
+    volumes:
+      - ./user_service/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-users:5432/${POSTGRES_DB_USERS}?sslmode=disable"
+      - "up"
+    depends_on:
+      postgres-users:
+        condition: service_healthy
 
   postgres-catalog:
     image:
@@ -45,11 +62,19 @@ services:
       dockerfile: catalog_service/Dockerfile
 
   gateway:
+    environment:
+      PORT: "8080"
+      USER_SERVICE_ADDRESS: user_service:${PORT}
+      PUBLIC_KEY_ADDRESS: /keys/public.pem
     ports:
     - "8080:8080"
     build:
       context: .
       dockerfile: gateway/Dockerfile
+    volumes:
+      - ./gateway/keys:/keys
+    depends_on:
+      - user_service
 
   streaming_service:
     build:
@@ -76,6 +101,13 @@ services:
       dockerfile: user_service/Dockerfile
     volumes:
       - ./user_service/keys:/app/keys
+    depends_on:
+      postgres-users:
+        condition: service_healthy
+      redis_users_sessions:
+        condition: service_started
+      user_service_migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres_users_data:

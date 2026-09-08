@@ -24,35 +24,33 @@ func NewRefreshUseCase(tokenManager TokenManager, sessionManager SessionStore) *
 }
 
 func (r *RefreshUseCase) Refresh(ctx context.Context, refreshToken string) (*RefreshResult, error) {
+	// validation refresh token
 	userUUID, err := r.sessionManager.Get(ctx, refreshToken)
 	if err == domain.ErrRefreshTokenNotFound {
 		return nil, domain.ErrRefreshTokenNotFound
 	}
 	if err != nil {
-		return nil, err
+		return &RefreshResult{}, err
 	}
 
+	// make response
 	newRefreshToken, err := r.tokenManager.NewRefreshToken()
 	if err != nil {
-		return nil, err
+		return &RefreshResult{}, err
 	}
 
 	newAccessToken, err := r.tokenManager.NewAccessToken(userUUID)
 	if err != nil {
-		return nil, err
+		return &RefreshResult{}, err
 	}
 
 	result := &RefreshResult{
 		RefreshToken: newRefreshToken,
 		AccessToken:  newAccessToken,
 	}
-	err = r.sessionManager.Save(ctx, newRefreshToken, userUUID)
+	err = r.sessionManager.Refresh(ctx, refreshToken, newRefreshToken)
 	if err != nil {
-		return nil, err
-	}
-	err = r.sessionManager.Delete(ctx, refreshToken)
-	if err != nil {
-		return nil, err
+		return &RefreshResult{}, err
 	}
 	return result, nil
 }

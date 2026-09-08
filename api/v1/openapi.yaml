@@ -2,19 +2,19 @@ openapi: 3.0.3
 info:
   title: Privy Stream API
   version: 1.0.0
-  description: Внешний REST API Gateway для аудио-стримингового сервиса 
+  description: Внешний REST API Gateway для аудио-стримингового сервиса
 servers:
-  - url: http://localhost:8080 
+  - url: http://localhost:8080
 
 paths:
   /register:
     post:
       summary: Регистрация нового пользователя
       operationId: registerUser
-      requestBody: 
+      requestBody:
         required: true
-        content: 
-          application/json: 
+        content:
+          application/json:
             schema:
               $ref: '#/components/schemas/RegisterRequest'
       responses:
@@ -25,9 +25,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Невалидные данные запроса
+          description: Invalid request data
         '409':
-          description: Пользователь с таким именем уже существует
+          description: A user with this name already exists
   /login:
     post:
       summary: Авторизация пользователя
@@ -43,13 +43,13 @@ paths:
           description: Пользователь успешно авторизовался
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Невалидные данные запроса
+          description: Invalid request data
         '401':
-          description: Неверный логин или пароль
-  
+          description: Invalid username or password
+
   /tracks/search:
     get:
       summary: Поиск треков по названию
@@ -58,7 +58,7 @@ paths:
         - name: track_name
           in: query
           required: true
-          schema: 
+          schema:
             type: string
           example: "Убийца карася"
         - name: limit
@@ -126,14 +126,14 @@ paths:
         '200':
           description: Полня информация об артисте
           content:
-            application/json: 
-              schema: 
+            application/json:
+              schema:
                 $ref: '#/components/schemas/FullArtist'
         '404':
-          description: Артист не найден
-     
+          description: Artist not found
+
   /albums/{album_id}:
-    get: 
+    get:
       summary: Полная информация об альбоме
       operationId: getAlbumById
       parameters:
@@ -151,8 +151,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/FullAlbum'
         '404':
-          description: Альбом не найден
-  
+          description: Album not found
+
   /playlists:
     post:
       summary: Создать плэйлист
@@ -161,14 +161,14 @@ paths:
         - bearerAuth: []
       requestBody:
         required: true
-        content: 
+        content:
           application/json:
             schema:
               type: object
               required:
                 - playlist_name
               properties:
-                playlist_name: 
+                playlist_name:
                   type: string
                   example: "Моя деревня"
       responses:
@@ -179,8 +179,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Playlist'
         '401':
-          description: Не авторизован  
-            
+          description: Unauthorized
+
   /playlists/{playlist_id}:
     get:
       summary: Получить плейлист с треками
@@ -202,10 +202,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Playlist'
         '403':
-          description: Плейлист принадлежит другому пользователю
+          description: The playlist belongs to another user
         '404':
-          description: Плейлист не найден
-  
+          description: Playlist not found
+
     delete:
       summary: Удалить плейлист
       operationId: deletePlaylist
@@ -222,9 +222,9 @@ paths:
         '204':
           description: Плейлист успешно удалён
         '403':
-          description: Плейлист принадлежит другому пользователю
+          description: The playlist belongs to another user
         '404':
-          description: Плейлист не найден
+          description: Playlist not found
 
 
   /stream/{track_id}:
@@ -272,9 +272,9 @@ paths:
                 type: string
                 format: binary
         '404':
-          description: Трек не найден (Streaming Service сверился с Catalog через TrackExists)
+          description: Track not found (Streaming Service checked with Catalog via TrackExists)
         '416':
-          description: Запрошенный диапазон выходит за пределы размера файла  
+          description: The requested range is outside the file size
 
 components:
   securitySchemes:
@@ -364,9 +364,9 @@ components:
           example: "PlayBoyCalich"
         albums:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/LightAlbum'
-    
+
     LightAlbum:
       type: object
       properties:
@@ -376,7 +376,7 @@ components:
         album_name:
           type: string
           example: "Убийца карася"
-    
+
     FullAlbum:
       type: object
       properties:

@@ -13,6 +13,7 @@ func NewLogoutUseCase(sessionManager SessionStore) *LogoutUseCase {
 }
 
 func (l *LogoutUseCase) Logout(ctx context.Context, refreshToken string) error {
+
 	err := l.sessionManager.Delete(ctx, refreshToken)
 	if err != nil {
 		return err

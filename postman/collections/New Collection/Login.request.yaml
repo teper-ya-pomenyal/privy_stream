@@ -1,0 +1,8 @@
+$kind: http-request
+description: ""
+url: localhost:8080/login
+method: POST
+body:
+  type: json
+  content: ' {"user_name": "test", "password": "YourPass123!"}'
+order: 2301169430484177
