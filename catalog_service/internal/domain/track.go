@@ -23,3 +23,10 @@ type TrackPath struct {
 	Path       string        `db:"path"`
 	DurationMS time.Duration `db:"duration_ms"`
 }
+
+type LightTrack struct {
+	TrackID    uuid.UUID     `db:"track_id"`
+	TrackName  string        `db:"track_name"`
+	Explicit   bool          `db:"explicit"`
+	DurationMS time.Duration `db:"duration_ms"`
+}

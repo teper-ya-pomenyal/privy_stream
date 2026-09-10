@@ -12,7 +12,7 @@ import (
 
 func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
 	_, err := c.conn.ExecContext(ctx,
-		"INSERT INTO tracks (track_id, track_name, artist_id, album_id, explicit, created_at, path, duration_ms) VALUES($1, $2, $3, $4, $5, $6, $7)",
+		"INSERT INTO tracks (track_id, track_name, artist_id, album_id, explicit, created_at, path, duration_ms) VALUES($1, $2, $3, $4, $5, $6, $7, $8)",
 		track.TrackID, track.TrackName, track.ArtistID, track.AlbumID, track.Explicit, track.CreatedAt, track.Path, track.DurationMS,
 	)
 	if err != nil {
@@ -48,7 +48,6 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 }
 
 func (c *PostgresCatalog) GetTracksPage(ctx context.Context, trackName string, limit, offset int) ([]domain.Track, error) {
-
 	rows, err := c.conn.QueryContext(ctx, `
 		SELECT
 			t.track_id, t.track_name, t.artist_id, ar.artist_name,
@@ -56,7 +55,7 @@ func (c *PostgresCatalog) GetTracksPage(ctx context.Context, trackName string, l
 		FROM tracks t
 		JOIN artists ar ON ar.artist_id = t.artist_id
 		JOIN albums al ON al.album_id = t.album_id
-		WHERE t.track_name = $1
+		WHERE t.track_name ILIKE '%' || $1 || '%' ESCAPE '\'
 		ORDER BY t.listened DESC
 		LIMIT $2 OFFSET $3
 		`,

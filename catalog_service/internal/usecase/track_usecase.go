@@ -12,7 +12,7 @@ type TrackUseCase struct {
 }
 
 func (t *TrackUseCase) GetTrackForStream(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
-	trackPath, err := t.repo.GetTrackById(ctx, trackUUID)
+	trackPath, err := t.repo.GetTrackByID(ctx, trackUUID)
 	if err != nil {
 		return &domain.TrackPath{}, err
 	}

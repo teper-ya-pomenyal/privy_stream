@@ -6,6 +6,6 @@ CREATE TABLE tracks (
     explicit BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     path TEXT NOT NULL,
-    duration_ms TIMESTAMPTZ NOT NULL
+    duration_ms TIMESTAMPTZ NOT NULL,
     listened INTEGER
 );

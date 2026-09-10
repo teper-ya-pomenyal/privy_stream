@@ -4,8 +4,12 @@ option go_package = "privy_stream/proto/catalog/v1;catalogv1";
 
 service CatalogService {
     rpc GetTrackByID(GetTrackByIDRequest) returns (GetTrackByIDResponse);
+    rpc GetPathTrack(GetPathTrackRequest) returns (GetPathTrackResponse);
     rpc GetArtistByID(GetArtistByIDRequest) returns (GetArtistByIDResponse);
     rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse);
+    rpc GetArtistAlbums(GetArtistAlbumsRequest) returns (GetArtistAlbumsResponse);
+    rpc GetArtistTracks(GetArtistTracksRequest) returns (GetArtistTracksResponse);
+    rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse);
     rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
     rpc TrackExists(TrackExistsRequest) returns (TrackExistsResponse);
     rpc SearchTrack(SearchTrackRequest) returns (SearchTrackResponse);
@@ -25,6 +29,15 @@ message Track {
     string album_name = 6;
     bool explicit = 7;
     int32 duration_ms = 8;
+}
+
+
+
+message LightTrack{
+    string track_uuid = 1;
+    string track_name = 2;
+    bool explicit = 3;
+    int32 duration_ms = 4;
 }
 
 message FullArtist {
@@ -51,6 +64,7 @@ message FullAlbum {
 message LightAlbum {
     string album_uuid = 1;
     string album_name = 2;
+    string created_at = 3;
 }
 
 message Playlist {
@@ -62,6 +76,44 @@ message Playlist {
 }
 
 // Методы
+
+message GetArtistTracksRequest {
+    string artist_uuid = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message GetArtistTracksResponse {
+    repeated LightTrack artist_tracks = 1;
+}
+
+message GetPathTrackRequest {
+    string track_uuid = 1;
+}
+
+message GetPathTrackResponse {
+    string path = 1;
+}
+
+message GetAlbumTracksRequest {
+    string album_uuid = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message GetAlbumTracksResponse {
+    repeated LightTrack light_track = 1;
+
+}
+
+message GetArtistAlbumsRequest{
+    string artist_uuid = 1;
+}
+
+message GetArtistAlbumsResponse {
+    repeated LightAlbum artist_albums = 1;
+}
+
 message GetTrackByIDRequest {
     string track_uuid = 1;
 }
