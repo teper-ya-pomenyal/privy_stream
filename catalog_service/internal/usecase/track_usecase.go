@@ -11,7 +11,7 @@ type TrackUseCase struct {
 	repo CatalogRepository
 }
 
-func (t *TrackUseCase) GetTrackForStream(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
+func (t *TrackUseCase) GetTrackByID(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
 	trackPath, err := t.repo.GetTrackByID(ctx, trackUUID)
 	if err != nil {
 		return &domain.TrackPath{}, err

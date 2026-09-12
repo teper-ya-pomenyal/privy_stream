@@ -2,12 +2,13 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
-func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, limit, offset int) ([]domain.LightArtist, error) {
+func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, limit, offset int) ([]domain.Artist, error) {
 	rows, err := c.conn.QueryContext(ctx, `
 		SELECT artist_id, artist_name
 		FROM artists
@@ -20,18 +21,18 @@ func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, l
 		return nil, err
 	}
 	defer rows.Close()
-	artists := []domain.LightArtist{}
+	artists := []domain.Artist{}
 	for rows.Next() {
-		var a domain.LightArtist
+		var a domain.Artist
 		if err := rows.Scan(
 			&a.ArtistID, &a.ArtistName,
 		); err != nil {
-			return []domain.LightArtist{}, err
+			return nil, err
 		}
 		artists = append(artists, a)
 	}
 	if err = rows.Err(); err != nil {
-		return []domain.LightArtist{}, err
+		return nil, err
 	}
 	return artists, nil
 }
@@ -47,7 +48,7 @@ func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.U
 		artistUUID, limit, offset,
 	)
 	if err != nil {
-		return []domain.LightAlbum{}, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -56,12 +57,12 @@ func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.U
 	for rows.Next() {
 		var a domain.LightAlbum
 		if err := rows.Scan(&a.AlbumUUID, &a.AlbumName, &a.CreatedAt); err != nil {
-			return []domain.LightAlbum{}, err
+			return nil, err
 		}
 		albums = append(albums, a)
 	}
 	if err := rows.Err(); err != nil {
-		return []domain.LightAlbum{}, err
+		return nil, err
 	}
 	return albums, nil
 }
@@ -77,7 +78,7 @@ func (c *PostgresCatalog) GetArtistTracks(ctx context.Context, artistUUID uuid.U
 		artistUUID, limit, offset,
 	)
 	if err != nil {
-		return []domain.LightTrack{}, err
+		return nil, err
 	}
 	defer rows.Close()
 	tracks := []domain.LightTrack{}
@@ -85,12 +86,32 @@ func (c *PostgresCatalog) GetArtistTracks(ctx context.Context, artistUUID uuid.U
 	for rows.Next() {
 		t := domain.LightTrack{}
 		if err := rows.Scan(&t.TrackID, &t.TrackName, &t.Explicit, &t.DurationMS); err != nil {
-			return []domain.LightTrack{}, err
+			return nil, err
 		}
 		tracks = append(tracks, t)
 	}
 	if err = rows.Err(); err != nil {
-		return []domain.LightTrack{}, err
+		return nil, err
 	}
 	return tracks, nil
+}
+
+func (c *PostgresCatalog) GetArtistByID(ctx context.Context, artistUUID uuid.UUID) (*domain.Artist, error) {
+	var a domain.Artist
+	err := c.conn.QueryRowContext(ctx, `
+		SELECT artist_id, artist_name
+		FROM artists
+		WHERE artist_id = $1
+		`,
+		artistUUID,
+	).Scan(&a.ArtistID, &a.ArtistName)
+	switch err {
+	case sql.ErrNoRows:
+		return nil, domain.ErrArtistNotFound
+	case nil:
+		return &a, err
+	default:
+		return nil, err
+	}
+
 }

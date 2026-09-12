@@ -3,20 +3,19 @@ package catalog.v1;
 option go_package = "privy_stream/proto/catalog/v1;catalogv1";
 
 service CatalogService {
-    rpc GetTrackByID(GetTrackByIDRequest) returns (GetTrackByIDResponse);
-    rpc GetPathTrack(GetPathTrackRequest) returns (GetPathTrackResponse);
-    rpc GetArtistByID(GetArtistByIDRequest) returns (GetArtistByIDResponse);
-    rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse);
-    rpc GetArtistAlbums(GetArtistAlbumsRequest) returns (GetArtistAlbumsResponse);
-    rpc GetArtistTracks(GetArtistTracksRequest) returns (GetArtistTracksResponse);
-    rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse);
-    rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
-    rpc TrackExists(TrackExistsRequest) returns (TrackExistsResponse);
-    rpc SearchTrack(SearchTrackRequest) returns (SearchTrackResponse);
-    rpc SearchArtist(SearchArtistRequest) returns (SearchArtistResponse);
+    rpc GetTrackByID(GetTrackByIDRequest) returns (GetTrackByIDResponse); //✔️☑️✅
+    rpc GetArtistByID(GetArtistByIDRequest) returns (GetArtistByIDResponse); //✔️
+    rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse); //✔️
+    rpc GetArtistAlbums(GetArtistAlbumsRequest) returns (GetArtistAlbumsResponse); //✔️
+    rpc GetArtistTracks(GetArtistTracksRequest) returns (GetArtistTracksResponse); //✔️
+    rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse); //✔️
+    rpc TrackExists(TrackExistsRequest) returns (TrackExistsResponse); //✔️
+    rpc SearchTrack(SearchTrackRequest) returns (SearchTrackResponse); //✔️
+    rpc SearchArtist(SearchArtistRequest) returns (SearchArtistResponse);  //✔️
 
-//     rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
-//     rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
+//  rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
+//  rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
+//  rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
 }
 
 // структуры для клиента
@@ -40,23 +39,24 @@ message LightTrack{
     int32 duration_ms = 4;
 }
 
-message FullArtist {
+message Artist {
     string artist_uuid = 1;
     string artist_name = 2;
-    repeated LightAlbum albums = 3;
 }
 
-message LightArtist {
-    string artist_uuid = 1;
-    string artist_name = 2;
-
+message AlbumTrack {
+    string track_uuid = 1;
+    string track_name = 2;
+    bool explicit = 3;
+    int32 position = 4;
+    int32 duration_ms = 5;
 }
 
 message FullAlbum {
     string album_name = 1;
     string artist_name = 2;
     string artist_uuid = 3;
-    repeated Track tracks = 4;
+    repeated AlbumTrack tracks = 4;
     string created_at = 5;
     string album_uuid = 6;
 }
@@ -85,14 +85,6 @@ message GetArtistTracksRequest {
 
 message GetArtistTracksResponse {
     repeated LightTrack artist_tracks = 1;
-}
-
-message GetPathTrackRequest {
-    string track_uuid = 1;
-}
-
-message GetPathTrackResponse {
-    string path = 1;
 }
 
 message GetAlbumTracksRequest {
@@ -156,7 +148,7 @@ message SearchArtistRequest {
 }
 
 message SearchArtistResponse {
-    repeated LightArtist artists = 1;
+    repeated Artist artists = 1;
 }
 
 
@@ -198,7 +190,7 @@ message GetArtistByIDRequest {
 }
 
 message GetArtistByIDResponse {
-    FullArtist artist = 1;
+    Artist artist = 1;
 }
 
 

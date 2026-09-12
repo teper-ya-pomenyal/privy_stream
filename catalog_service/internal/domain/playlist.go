@@ -11,4 +11,5 @@ type Playlist struct {
 	PlaylistName string    `db:"playlist_name"`
 	OwnerID      uuid.UUID `db:"owner_id"`
 	CreatedAt    time.Time `db:"created_at"`
+	Tracks       []LightPlaylistTrack
 }

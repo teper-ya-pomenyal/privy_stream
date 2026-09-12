@@ -12,7 +12,10 @@ import (
 
 func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
 	_, err := c.conn.ExecContext(ctx,
-		"INSERT INTO tracks (track_id, track_name, artist_id, album_id, explicit, created_at, path, duration_ms) VALUES($1, $2, $3, $4, $5, $6, $7, $8)",
+		`INSERT INTO tracks
+			(track_id, track_name, artist_id, album_id,
+			explicit, created_at, path, duration_ms)
+		 VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
 		track.TrackID, track.TrackName, track.ArtistID, track.AlbumID, track.Explicit, track.CreatedAt, track.Path, track.DurationMS,
 	)
 	if err != nil {
@@ -62,7 +65,7 @@ func (c *PostgresCatalog) GetTracksPage(ctx context.Context, trackName string, l
 		trackName, limit, offset,
 	)
 	if err != nil {
-		return []domain.Track{}, err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -73,14 +76,33 @@ func (c *PostgresCatalog) GetTracksPage(ctx context.Context, trackName string, l
 			&t.TrackID, &t.TrackName, &t.ArtistID, &t.ArtistName,
 			&t.AlbumID, &t.AlbumName, &t.Explicit, &t.CreatedAt,
 		); err != nil {
-			return []domain.Track{}, err
+			return nil, err
 		}
 		tracks = append(tracks, t)
 	}
 
 	if err = rows.Err(); err != nil {
-		return []domain.Track{}, err
+		return nil, err
 	}
 	return tracks, nil
 
+}
+
+func (c *PostgresCatalog) TrackExists(ctx context.Context, trackUUID uuid.UUID) (bool, error) {
+	var id uuid.UUID
+	err := c.conn.QueryRowContext(ctx, `
+		SELECT track_id
+		FROM tracks
+		WHERE track_id = $1
+		`,
+		trackUUID,
+	).Scan(&id)
+	switch err {
+	case sql.ErrNoRows:
+		return false, nil
+	case nil:
+		return true, nil
+	default:
+		return false, err
+	}
 }

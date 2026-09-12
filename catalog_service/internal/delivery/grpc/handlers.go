@@ -24,7 +24,7 @@ func (h *CatalogGRPCHandler) GetTrackByID(ctx context.Context, req *catalogv1.Ge
 	if err != nil {
 		return &catalogv1.GetTrackByIDResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidUUID.Error())
 	}
-	trackPath, err := h.trackUseCase.GetTrackForStream(ctx, trackUUID)
+	trackPath, err := h.trackUseCase.GetTrackByID(ctx, trackUUID)
 	if err != nil {
 		return &catalogv1.GetTrackByIDResponse{}, mapDomainError(err)
 	}

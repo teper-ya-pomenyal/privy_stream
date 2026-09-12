@@ -30,3 +30,19 @@ type LightTrack struct {
 	Explicit   bool          `db:"explicit"`
 	DurationMS time.Duration `db:"duration_ms"`
 }
+
+type LightAlbumTrack struct {
+	TrackID    uuid.UUID     `db:"track_id"`
+	TrackName  string        `db:"track_name"`
+	Explicit   bool          `db:"explicit"`
+	DurationMS time.Duration `db:"duration_ms"`
+	Position   int           `db:"position"`
+}
+
+type LightPlaylistTrack struct {
+	TrackID    uuid.UUID     `db:"track_id"`
+	TrackName  string        `db:"track_name"`
+	Explicit   bool          `db:"explicit"`
+	DurationMS time.Duration `db:"duration_ms"`
+	Position   int           `db:"position"`
+}
