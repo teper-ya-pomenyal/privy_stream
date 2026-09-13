@@ -50,7 +50,7 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 	}
 }
 
-func (c *PostgresCatalog) GetTracksPage(ctx context.Context, trackName string, limit, offset int) ([]domain.Track, error) {
+func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, limit, offset int) ([]domain.Track, error) {
 	rows, err := c.conn.QueryContext(ctx, `
 		SELECT
 			t.track_id, t.track_name, t.artist_id, ar.artist_name,

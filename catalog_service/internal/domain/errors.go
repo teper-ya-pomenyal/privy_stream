@@ -11,3 +11,9 @@ var (
 	ErrInvalidCharacters  = errors.New("invalid characters")
 	ErrInvalidUUID        = errors.New("invalid uuid")
 )
+
+var (
+	ErrInvalidPageParameters = errors.New("invalid page parameters")
+	ErrInvalidTrackName      = errors.New("invalid track name")
+	ErrInvalidArtistName     = errors.New("invalid artist name")
+)
