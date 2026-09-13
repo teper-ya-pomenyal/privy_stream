@@ -1,0 +1,4 @@
+ALTER TABLE tracks
+    ADD COLUMN path TEXT NOT NULL,
+    ADD COLUMN duration_ms BIGINT NOT NULL,
+    ADD COLUMN listened INTEGER;
