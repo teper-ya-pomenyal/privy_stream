@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func mapUserServiceError(w http.ResponseWriter, err error) {
+func mapGRPCError(w http.ResponseWriter, err error) {
 	code := status.Code(err)
 
 	var httpStatus int
@@ -19,6 +19,8 @@ func mapUserServiceError(w http.ResponseWriter, err error) {
 		httpStatus = http.StatusConflict
 	case codes.InvalidArgument:
 		httpStatus = http.StatusBadRequest
+	case codes.NotFound:
+		httpStatus = http.StatusNotFound
 	default:
 		httpStatus = http.StatusInternalServerError
 	}

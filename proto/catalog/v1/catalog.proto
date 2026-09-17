@@ -89,8 +89,6 @@ message GetArtistTracksResponse {
 
 message GetAlbumTracksRequest {
     string album_uuid = 1;
-    int32 limit = 2;
-    int32 offset = 3;
 }
 
 message GetAlbumTracksResponse {
@@ -100,6 +98,8 @@ message GetAlbumTracksResponse {
 
 message GetArtistAlbumsRequest{
     string artist_uuid = 1;
+    int32 limit = 2;
+    int32 offset = 3;
 }
 
 message GetArtistAlbumsResponse {

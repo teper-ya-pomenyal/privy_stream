@@ -43,7 +43,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := h.userClient.Login(r.Context(), req.UserName, req.Password)
 	if err != nil {
-		mapUserServiceError(w, err)
+		mapGRPCError(w, err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := h.userClient.Register(r.Context(), req.UserName, req.Password, birthDate)
 	if err != nil {
-		mapUserServiceError(w, err)
+		mapGRPCError(w, err)
 		return
 	}
 
@@ -94,7 +94,7 @@ func (h *UserHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.userClient.Refresh(r.Context(), req.RefreshToken)
 	if err != nil {
-		mapUserServiceError(w, err)
+		mapGRPCError(w, err)
 		return
 	}
 
@@ -117,7 +117,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	err := h.userClient.Logout(r.Context(), req.RefreshToken)
 	if err != nil {
-		mapUserServiceError(w, err)
+		mapGRPCError(w, err)
 		return
 	}
 

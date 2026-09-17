@@ -23,6 +23,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	catalogClient, err := clients.NewCatalogClient(cfg.CatalogServiceAddress)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	publicKey, err := jwtmanager.LoadPublicKey(cfg.PubKeyAddress)
 	if err != nil {
 		log.Fatal(err)
@@ -31,12 +36,14 @@ func main() {
 	mw := middlewares.NewMiddleWares(verifier)
 
 	userHandler := handlers.NewUserHandler(userClient)
+	catalogHandler := handlers.NewCatalogHandler(catalogClient)
 
-	userRouter := userHandler.NewRouter(mw)
+	router := userHandler.NewRouter(mw)
+	catalogHandler.MountRoutes(router, mw)
 
 	srv := http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: userRouter,
+		Handler: router,
 	}
 
 	go func() {

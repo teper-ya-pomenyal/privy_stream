@@ -1,0 +1,191 @@
+package clients
+
+import (
+	"context"
+
+	catalogv1 "github.com/teper-ya-pomenyal/privy_stream/proto/catalog/v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+type Track struct {
+	TrackUUID  string `json:"track_uuid"`
+	TrackName  string `json:"track_name"`
+	ArtistUUID string `json:"artist_uuid"`
+	ArtistName string `json:"artist_name"`
+	AlbumUUID  string `json:"album_uuid"`
+	AlbumName  string `json:"album_name"`
+	Explicit   bool   `json:"explicit"`
+	DurationMs int32  `json:"duration_ms"`
+}
+
+type LightTrack struct {
+	TrackUUID  string `json:"track_uuid"`
+	TrackName  string `json:"track_name"`
+	Explicit   bool   `json:"explicit"`
+	DurationMs int32  `json:"duration_ms"`
+}
+
+type TrackPath struct {
+	Path       string `json:"path"`
+	DurationMs int32  `json:"duration_ms"`
+}
+
+type Artist struct {
+	ArtistUUID string `json:"artist_uuid"`
+	ArtistName string `json:"artist_name"`
+}
+
+type LightAlbum struct {
+	AlbumUUID string `json:"album_uuid"`
+	AlbumName string `json:"album_name"`
+	CreatedAt string `json:"created_at"`
+}
+
+type AlbumTrack struct {
+	TrackUUID  string `json:"track_uuid"`
+	TrackName  string `json:"track_name"`
+	Explicit   bool   `json:"explicit"`
+	Position   int32  `json:"position"`
+	DurationMs int32  `json:"duration_ms"`
+}
+
+type FullAlbum struct {
+	AlbumUUID  string       `json:"album_uuid"`
+	AlbumName  string       `json:"album_name"`
+	ArtistUUID string       `json:"artist_uuid"`
+	ArtistName string       `json:"artist_name"`
+	CreatedAt  string       `json:"created_at"`
+	Tracks     []AlbumTrack `json:"tracks"`
+}
+
+type CatalogClient struct {
+	conn       *grpc.ClientConn
+	grpcClient catalogv1.CatalogServiceClient
+}
+
+func NewCatalogClient(address string) (*CatalogClient, error) {
+	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return &CatalogClient{conn: conn, grpcClient: catalogv1.NewCatalogServiceClient(conn)}, nil
+}
+
+func (c *CatalogClient) GetTrackByID(ctx context.Context, trackUUID string) (*TrackPath, error) {
+	res, err := c.grpcClient.GetTrackByID(ctx, &catalogv1.GetTrackByIDRequest{TrackUuid: trackUUID})
+	if err != nil {
+		return nil, err
+	}
+	return &TrackPath{Path: res.Path, DurationMs: res.DurationMs}, nil
+}
+
+func (c *CatalogClient) TrackExists(ctx context.Context, trackUUID string) (bool, error) {
+	res, err := c.grpcClient.TrackExists(ctx, &catalogv1.TrackExistsRequest{TrackUuid: trackUUID})
+	if err != nil {
+		return false, err
+	}
+	return res.Exists, nil
+}
+
+func (c *CatalogClient) SearchTrack(ctx context.Context, trackName string, limit, offset int32) ([]Track, error) {
+	res, err := c.grpcClient.SearchTrack(ctx, &catalogv1.SearchTrackRequest{TrackName: trackName, Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]Track, 0, len(res.Tracks))
+	for _, t := range res.Tracks {
+		tracks = append(tracks, Track{
+			TrackUUID:  t.TrackUuid,
+			TrackName:  t.TrackName,
+			ArtistUUID: t.ArtistUuid,
+			ArtistName: t.ArtistName,
+			AlbumUUID:  t.AlbumUuid,
+			AlbumName:  t.AlbumName,
+			Explicit:   t.Explicit,
+			DurationMs: t.DurationMs,
+		})
+	}
+	return tracks, nil
+}
+
+func (c *CatalogClient) GetArtistByID(ctx context.Context, artistUUID string) (*Artist, error) {
+	res, err := c.grpcClient.GetArtistByID(ctx, &catalogv1.GetArtistByIDRequest{ArtistUuid: artistUUID})
+	if err != nil {
+		return nil, err
+	}
+	return &Artist{ArtistUUID: res.Artist.ArtistUuid, ArtistName: res.Artist.ArtistName}, nil
+}
+
+func (c *CatalogClient) SearchArtist(ctx context.Context, artistName string, limit, offset int32) ([]Artist, error) {
+	res, err := c.grpcClient.SearchArtist(ctx, &catalogv1.SearchArtistRequest{ArtistName: artistName, Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, err
+	}
+	artists := make([]Artist, 0, len(res.Artists))
+	for _, a := range res.Artists {
+		artists = append(artists, Artist{ArtistUUID: a.ArtistUuid, ArtistName: a.ArtistName})
+	}
+	return artists, nil
+}
+
+func (c *CatalogClient) GetArtistAlbums(ctx context.Context, artistUUID string, limit, offset int32) ([]LightAlbum, error) {
+	res, err := c.grpcClient.GetArtistAlbums(ctx, &catalogv1.GetArtistAlbumsRequest{ArtistUuid: artistUUID, Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, err
+	}
+	albums := make([]LightAlbum, 0, len(res.ArtistAlbums))
+	for _, a := range res.ArtistAlbums {
+		albums = append(albums, LightAlbum{AlbumUUID: a.AlbumUuid, AlbumName: a.AlbumName, CreatedAt: a.CreatedAt})
+	}
+	return albums, nil
+}
+
+func (c *CatalogClient) GetArtistTracks(ctx context.Context, artistUUID string, limit, offset int32) ([]LightTrack, error) {
+	res, err := c.grpcClient.GetArtistTracks(ctx, &catalogv1.GetArtistTracksRequest{ArtistUuid: artistUUID, Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]LightTrack, 0, len(res.ArtistTracks))
+	for _, t := range res.ArtistTracks {
+		tracks = append(tracks, LightTrack{TrackUUID: t.TrackUuid, TrackName: t.TrackName, Explicit: t.Explicit, DurationMs: t.DurationMs})
+	}
+	return tracks, nil
+}
+
+func (c *CatalogClient) GetAlbumByID(ctx context.Context, albumUUID string) (*FullAlbum, error) {
+	res, err := c.grpcClient.GetAlbumByID(ctx, &catalogv1.GetAlbumByIDRequest{AlbumUuid: albumUUID})
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]AlbumTrack, 0, len(res.Album.Tracks))
+	for _, t := range res.Album.Tracks {
+		tracks = append(tracks, AlbumTrack{
+			TrackUUID:  t.TrackUuid,
+			TrackName:  t.TrackName,
+			Explicit:   t.Explicit,
+			Position:   t.Position,
+			DurationMs: t.DurationMs,
+		})
+	}
+	return &FullAlbum{
+		AlbumUUID:  res.Album.AlbumUuid,
+		AlbumName:  res.Album.AlbumName,
+		ArtistUUID: res.Album.ArtistUuid,
+		ArtistName: res.Album.ArtistName,
+		CreatedAt:  res.Album.CreatedAt,
+		Tracks:     tracks,
+	}, nil
+}
+
+func (c *CatalogClient) GetAlbumTracks(ctx context.Context, albumUUID string) ([]LightTrack, error) {
+	res, err := c.grpcClient.GetAlbumTracks(ctx, &catalogv1.GetAlbumTracksRequest{AlbumUuid: albumUUID})
+	if err != nil {
+		return nil, err
+	}
+	tracks := make([]LightTrack, 0, len(res.LightTrack))
+	for _, t := range res.LightTrack {
+		tracks = append(tracks, LightTrack{TrackUUID: t.TrackUuid, TrackName: t.TrackName, Explicit: t.Explicit, DurationMs: t.DurationMs})
+	}
+	return tracks, nil
+}

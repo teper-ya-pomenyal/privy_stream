@@ -74,6 +74,9 @@ services:
       - redis_users_sessions_data:/data
 
   catalog_service:
+    environment:
+      CATALOG_SERVICE_PORT: ${CATALOG_SERVICE_PORT:-50053}
+      CATALOG_DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-catalog:5432/${POSTGRES_DB_CATALOG:-catalog_db}?sslmode=disable"
     build:
       context: .
       dockerfile: catalog_service/Dockerfile
@@ -89,6 +92,7 @@ services:
     environment:
       PORT: "8080"
       USER_SERVICE_ADDRESS: user_service:${PORT}
+      CATALOG_SERVICE_ADDRESS: catalog_service:${CATALOG_SERVICE_PORT:-50053}
       PUBLIC_KEY_ADDRESS: /keys/public.pem
     ports:
     - "8080:8080"
@@ -99,6 +103,7 @@ services:
       - ./gateway/keys:/keys
     depends_on:
       - user_service
+      - catalog_service
 
   streaming_service:
     build:
