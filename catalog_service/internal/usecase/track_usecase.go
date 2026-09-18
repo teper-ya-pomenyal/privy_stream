@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
@@ -42,4 +43,26 @@ func (t *TrackUseCase) SearchTracks(ctx context.Context, trackName string, limit
 		return nil, err
 	}
 	return tracks, nil
+}
+
+func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUID, albumUUID uuid.UUID, explicit bool, path string, durationMS time.Duration) (*domain.Track, error) {
+	cleanTN, err := utilites.ValidateTrackName(trackName)
+	if err != nil {
+		return nil, err
+	}
+
+	track := &domain.Track{
+		TrackID:    uuid.New(),
+		TrackName:  cleanTN,
+		ArtistID:   artistUUID,
+		AlbumID:    albumUUID,
+		Explicit:   explicit,
+		CreatedAt:  time.Now(),
+		Path:       path,
+		DurationMS: durationMS,
+	}
+	if err := t.repo.AddTrack(ctx, track); err != nil {
+		return nil, err
+	}
+	return track, nil
 }

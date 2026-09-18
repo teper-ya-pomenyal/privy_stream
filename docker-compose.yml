@@ -101,6 +101,7 @@ services:
       dockerfile: gateway/Dockerfile
     volumes:
       - ./gateway/keys:/keys
+      - tracks_storage:/data/tracks
     depends_on:
       - user_service
       - catalog_service
@@ -109,6 +110,8 @@ services:
     build:
       context: .
       dockerfile: streaming_service/Dockerfile
+    volumes:
+      - tracks_storage:/data/tracks
 
   user_service:
     environment:
@@ -139,6 +142,7 @@ services:
         condition: service_completed_successfully
 
 volumes:
+  tracks_storage:
   postgres_users_data:
   postgres_catalog_data:
   redis_catalog_cache_data:

@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
@@ -25,7 +27,7 @@ func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, l
 	for rows.Next() {
 		var a domain.Artist
 		if err := rows.Scan(
-			&a.ArtistID, &a.ArtistName,
+			&a.ArtistUUID, &a.ArtistName,
 		); err != nil {
 			return nil, err
 		}
@@ -37,7 +39,7 @@ func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, l
 	return artists, nil
 }
 
-func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.UUID, limit, offset int32) ([]domain.LightAlbum, error) {
+func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.UUID, limit, offset int32) ([]domain.Album, error) {
 	rows, err := c.conn.QueryContext(ctx, `
 			SELECT album_id, album_name, created_at
 			FROM albums
@@ -52,10 +54,10 @@ func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.U
 	}
 	defer rows.Close()
 
-	albums := []domain.LightAlbum{}
+	albums := []domain.Album{}
 
 	for rows.Next() {
-		var a domain.LightAlbum
+		var a domain.Album
 		if err := rows.Scan(&a.AlbumUUID, &a.AlbumName, &a.CreatedAt); err != nil {
 			return nil, err
 		}
@@ -104,7 +106,7 @@ func (c *PostgresCatalog) GetArtistByID(ctx context.Context, artistUUID uuid.UUI
 		WHERE artist_id = $1
 		`,
 		artistUUID,
-	).Scan(&a.ArtistID, &a.ArtistName)
+	).Scan(&a.ArtistUUID, &a.ArtistName)
 	switch err {
 	case sql.ErrNoRows:
 		return nil, domain.ErrArtistNotFound
@@ -114,4 +116,24 @@ func (c *PostgresCatalog) GetArtistByID(ctx context.Context, artistUUID uuid.UUI
 		return nil, err
 	}
 
+}
+
+/////////////////////////////////////////////////////////////////
+
+func (c *PostgresCatalog) AddArtist(ctx context.Context, artist domain.Artist) error {
+	_, err := c.conn.ExecContext(ctx, `
+		INSERT INTO artists
+			(artist_id, artist_name, created_at)
+		VALUES($1, $2, $3)
+		`,
+		artist.ArtistUUID, artist.ArtistName, artist.CreatedAt,
+	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return domain.ErrArtistAlreadyExists
+		}
+		return err
+	}
+	return nil
 }

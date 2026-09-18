@@ -17,8 +17,13 @@ func (h *CatalogHandler) MountRoutes(r chi.Router, m *mw.MiddleWares) {
 		r.Get("/artists/{artist_uuid}", h.GetArtistByID)
 		r.Get("/artists/{artist_uuid}/albums", h.GetArtistAlbums)
 		r.Get("/artists/{artist_uuid}/tracks", h.GetArtistTracks)
+		r.Post("/artists", h.AddArtist)
 
 		r.Get("/albums/{album_uuid}", h.GetAlbumByID)
 		r.Get("/albums/{album_uuid}/tracks", h.GetAlbumTracks)
+		r.Post("/albums", h.AddAlbum)
+		r.Post("/albums/{album_uuid}/tracks", h.AddTracksToAlbum)
+
+		r.Post("/tracks", h.AddTrack)
 	})
 }

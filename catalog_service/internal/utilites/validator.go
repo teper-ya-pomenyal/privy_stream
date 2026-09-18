@@ -21,3 +21,11 @@ func ValidateArtistName(artistName string) (string, error) {
 	}
 	return cleanAN, nil
 }
+
+func ValidateAlbumName(albumName string) (string, error) {
+	cleanAlN := strings.TrimSpace(albumName)
+	if cleanAlN == "" {
+		return "", domain.ErrInvalidAlbumName
+	}
+	return cleanAlN, nil
+}

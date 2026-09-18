@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
@@ -12,21 +14,15 @@ func (c *PostgresCatalog) GetAlbumByID(ctx context.Context, albumUUID uuid.UUID)
 	var album domain.Album
 	err := c.conn.QueryRowContext(ctx, `
 		SELECT
-			al.album_id, al.artist_id, al.album_name,
-			ar.artist_name, al.created_at
-		FROM albums al
-		JOIN artists ar ON ar.artist_id = al.artist_id
-		WHERE al.album_id = $1
+			album_id, artist_id, album_name, created_at
+		FROM albums
+		WHERE album_id = $1
 		`, albumUUID,
-	).Scan(&album.AlbumID, &album.ArtistID, &album.AlbumName, &album.ArtistName, &album.CreatedAt)
+	).Scan(&album.AlbumUUID, &album.ArtistUUID, &album.AlbumName, &album.CreatedAt)
 	switch err {
 	case sql.ErrNoRows:
 		return nil, domain.ErrAlbumNotFound
 	case nil:
-		album.Tracks, err = c.GetAlbumTracks(ctx, albumUUID)
-		if err != nil {
-			return nil, err
-		}
 		return &album, err
 	default:
 		return nil, err
@@ -61,4 +57,22 @@ func (c *PostgresCatalog) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUI
 		return nil, err
 	}
 	return tracks, nil
+}
+
+///////////////////////////////////////////////
+
+func (c *PostgresCatalog) AddAlbum(ctx context.Context, album *domain.Album) error {
+	_, err := c.conn.ExecContext(ctx, `
+		INSERT INTO albums
+			(album_id, artist_id, album_name, created_at)
+		VALUES($1, $2, $3, $4)
+		`, album.AlbumUUID, album.ArtistUUID, album.AlbumName, album.CreatedAt)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return domain.ErrAlbumAlreadyExists
+		}
+		return err
+	}
+	return nil
 }

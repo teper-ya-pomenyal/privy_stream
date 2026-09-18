@@ -135,3 +135,97 @@ func (h *CatalogHandler) GetAlbumTracks(w http.ResponseWriter, r *http.Request) 
 	}
 	writeJSON(w, http.StatusOK, res)
 }
+
+type AddArtistRequest struct {
+	ArtistName string `json:"artist_name"`
+}
+
+func (h *CatalogHandler) AddArtist(w http.ResponseWriter, r *http.Request) {
+	var req AddArtistRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.ArtistName == "" {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	res, err := h.catalogClient.AddArtist(r.Context(), req.ArtistName)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, res)
+}
+
+type AddAlbumRequest struct {
+	ArtistUUID string `json:"artist_uuid"`
+	AlbumName  string `json:"album_name"`
+}
+
+func (h *CatalogHandler) AddAlbum(w http.ResponseWriter, r *http.Request) {
+	var req AddAlbumRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.ArtistUUID == "" || req.AlbumName == "" {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	res, err := h.catalogClient.AddAlbum(r.Context(), req.ArtistUUID, req.AlbumName)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, res)
+}
+
+type AddTrackRequest struct {
+	TrackName  string `json:"track_name"`
+	ArtistUUID string `json:"artist_uuid"`
+	AlbumUUID  string `json:"album_uuid"`
+	Explicit   bool   `json:"explicit"`
+	Path       string `json:"path"`
+	DurationMs int32  `json:"duration_ms"`
+}
+
+func (h *CatalogHandler) AddTrack(w http.ResponseWriter, r *http.Request) {
+	var req AddTrackRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.TrackName == "" || req.ArtistUUID == "" || req.AlbumUUID == "" {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	res, err := h.catalogClient.AddTrack(r.Context(), req.TrackName, req.ArtistUUID, req.AlbumUUID, req.Explicit, req.Path, req.DurationMs)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, res)
+}
+
+type AddTracksToAlbumRequest struct {
+	Tracks []clients.AlbumTrackInput `json:"tracks"`
+}
+
+func (h *CatalogHandler) AddTracksToAlbum(w http.ResponseWriter, r *http.Request) {
+	var req AddTracksToAlbumRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if len(req.Tracks) == 0 {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	albumUUID := chi.URLParam(r, "album_uuid")
+	if err := h.catalogClient.AddTracksToAlbum(r.Context(), albumUUID, req.Tracks); err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

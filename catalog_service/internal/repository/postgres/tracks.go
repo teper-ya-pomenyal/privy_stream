@@ -10,25 +10,6 @@ import (
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
-func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
-	_, err := c.conn.ExecContext(ctx,
-		`INSERT INTO tracks
-			(track_id, track_name, artist_id, album_id,
-			explicit, created_at, path, duration_ms)
-		 VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
-		track.TrackID, track.TrackName, track.ArtistID, track.AlbumID, track.Explicit, track.CreatedAt, track.Path, track.DurationMS,
-	)
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return domain.ErrTrackAlreadyExists
-		}
-		return err
-	}
-
-	return nil
-}
-
 func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
 	trackPath := &domain.TrackPath{}
 
@@ -105,4 +86,25 @@ func (c *PostgresCatalog) TrackExists(ctx context.Context, trackUUID uuid.UUID) 
 	default:
 		return false, err
 	}
+}
+
+//////////////////////////////////////////////////////
+
+func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
+	_, err := c.conn.ExecContext(ctx,
+		`INSERT INTO tracks
+			(track_id, track_name, artist_id, album_id,
+			explicit, created_at, path, duration_ms)
+		 VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
+		track.TrackID, track.TrackName, track.ArtistID, track.AlbumID, track.Explicit, track.CreatedAt, track.Path, track.DurationMS,
+	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return domain.ErrTrackAlreadyExists
+		}
+		return err
+	}
+
+	return nil
 }

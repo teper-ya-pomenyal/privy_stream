@@ -24,7 +24,7 @@ func (h *CatalogGRPCHandler) GetArtistByID(ctx context.Context, req *catalogv1.G
 	}
 	return &catalogv1.GetArtistByIDResponse{
 		Artist: &catalogv1.Artist{
-			ArtistUuid: artist.ArtistID.String(),
+			ArtistUuid: artist.ArtistUUID.String(),
 			ArtistName: artist.ArtistName,
 		},
 	}, nil
@@ -38,7 +38,7 @@ func (h *CatalogGRPCHandler) SearchArtist(ctx context.Context, req *catalogv1.Se
 	respArtists := make([]*catalogv1.Artist, 0, len(artists))
 	for _, a := range artists {
 		respArtists = append(respArtists, &catalogv1.Artist{
-			ArtistUuid: a.ArtistID.String(),
+			ArtistUuid: a.ArtistUUID.String(),
 			ArtistName: a.ArtistName,
 		})
 	}
@@ -90,4 +90,20 @@ func (h *CatalogGRPCHandler) GetArtistTracks(ctx context.Context, req *catalogv1
 		})
 	}
 	return &catalogv1.GetArtistTracksResponse{ArtistTracks: respTracks}, nil
+}
+
+func (h *CatalogGRPCHandler) AddArtist(ctx context.Context, req *catalogv1.AddArtistRequest) (*catalogv1.AddArtistResponse, error) {
+	if req.ArtistName == "" {
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+	}
+	artist, err := h.artistUseCase.AddArtist(ctx, req.ArtistName)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+	return &catalogv1.AddArtistResponse{
+		Artist: &catalogv1.Artist{
+			ArtistUuid: artist.ArtistUUID.String(),
+			ArtistName: artist.ArtistName,
+		},
+	}, nil
 }

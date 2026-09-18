@@ -13,6 +13,11 @@ service CatalogService {
     rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse); //✔️☑️
     rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse); //✔️☑️
 
+    rpc AddArtist(AddArtistRequest) returns (AddArtistResponse);
+    rpc AddAlbum(AddAlbumRequest) returns (AddAlbumResponse);
+    rpc AddTrack(AddTrackRequest) returns (AddTrackResponse);
+    rpc AddTracksToAlbum(AddTracksToAlbumRequest) returns (AddTracksToAlbumResponse);
+
 //  rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
 //  rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
 //  rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
@@ -44,21 +49,11 @@ message Artist {
     string artist_name = 2;
 }
 
-message AlbumTrack {
-    string track_uuid = 1;
-    string track_name = 2;
-    bool explicit = 3;
-    int32 position = 4;
-    int32 duration_ms = 5;
-}
-
-message FullAlbum {
-    string album_name = 1;
-    string artist_name = 2;
-    string artist_uuid = 3;
-    repeated AlbumTrack tracks = 4;
-    string created_at = 5;
-    string album_uuid = 6;
+message Album {
+    string album_uuid = 1;
+    string artist_uuid = 2;
+    string album_name = 3;
+    string created_at = 4;
 }
 
 message LightAlbum {
@@ -200,5 +195,57 @@ message GetAlbumByIDRequest {
 }
 
 message GetAlbumByIDResponse {
-    FullAlbum album = 1;
+    Album album = 1;
 }
+
+//
+message AddArtistRequest {
+    string artist_name = 1;
+}
+
+message AddArtistResponse {
+    Artist artist = 1;
+}
+
+//
+message AddAlbumRequest {
+    string artist_uuid = 1;
+    string album_name = 2;
+}
+
+message AddAlbumResponse {
+    Album album = 1;
+}
+
+//
+message AddTrackRequest {
+    string track_name = 1;
+    string artist_uuid = 2;
+    string album_uuid = 3;
+    bool explicit = 4;
+    string path = 5;
+    int32 duration_ms = 6;
+}
+
+message AddTrackResponse {
+    string track_uuid = 1;
+    string track_name = 2;
+    string artist_uuid = 3;
+    string album_uuid = 4;
+    bool explicit = 5;
+    string path = 6;
+    int32 duration_ms = 7;
+}
+
+//
+message AlbumTrackInput {
+    string track_uuid = 1;
+    int32 position = 2;
+}
+
+message AddTracksToAlbumRequest {
+    string album_uuid = 1;
+    repeated AlbumTrackInput tracks = 2;
+}
+
+message AddTracksToAlbumResponse {}
