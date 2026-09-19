@@ -36,31 +36,31 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 	// user search
 	err := utils.ValidateUsername(userName)
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 	err = utils.ValidatePassword(password)
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 
 	user, err := l.repo.GetUserByUserName(ctx, userName)
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return &LoginResult{}, domain.ErrInvalidCredentials
+		return nil, domain.ErrInvalidCredentials
 	}
 
 	//make session
 
 	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID)
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 	refreshToken, err := l.tokenManager.NewRefreshToken()
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 	loginResult := &LoginResult{
 		UUID:         user.UserUUID.String(),
@@ -71,7 +71,7 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 	}
 	err = l.sessionManager.Save(ctx, refreshToken, user.UserUUID)
 	if err != nil {
-		return &LoginResult{}, err
+		return nil, err
 	}
 	return loginResult, nil
 }

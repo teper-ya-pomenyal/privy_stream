@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
-	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utilites"
+	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utils"
 )
 
 type TrackUseCase struct {
@@ -34,7 +34,7 @@ func (t *TrackUseCase) SearchTracks(ctx context.Context, trackName string, limit
 	if limit < 1 || offset < 0 {
 		return nil, domain.ErrInvalidPageParameters
 	}
-	cleanTN, err := utilites.ValidateTrackName(trackName)
+	cleanTN, err := utils.ValidateTrackName(trackName)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (t *TrackUseCase) SearchTracks(ctx context.Context, trackName string, limit
 }
 
 func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUID, albumUUID uuid.UUID, explicit bool, path string, durationMS time.Duration) (*domain.Track, error) {
-	cleanTN, err := utilites.ValidateTrackName(trackName)
+	cleanTN, err := utils.ValidateTrackName(trackName)
 	if err != nil {
 		return nil, err
 	}

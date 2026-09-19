@@ -36,11 +36,11 @@ func NewUserGRPCHandler(
 func (h *UserGRPCHandler) Login(ctx context.Context, req *userv1.LoginRequest) (*userv1.LoginResponse, error) {
 
 	if req.UserName == "" {
-		return &userv1.LoginResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
 	}
 
 	if req.Password == "" {
-		return &userv1.LoginResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
 	}
 
 	res, err := h.loginUseCase.Login(ctx, req.UserName, req.Password)
@@ -57,15 +57,15 @@ func (h *UserGRPCHandler) Login(ctx context.Context, req *userv1.LoginRequest) (
 
 func (h *UserGRPCHandler) Register(ctx context.Context, req *userv1.RegisterRequest) (*userv1.RegisterResponse, error) {
 	if req.UserName == "" {
-		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
 	}
 
 	if req.Password == "" {
-		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
 	}
 
 	if req.BirthDate == nil {
-		return &userv1.RegisterResponse{}, status.Error(codes.InvalidArgument, domain.ErrInvalidDate.Error())
+		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidDate.Error())
 	}
 
 	res, err := h.registerUseCase.Register(ctx, req.UserName, req.Password, req.BirthDate.AsTime())

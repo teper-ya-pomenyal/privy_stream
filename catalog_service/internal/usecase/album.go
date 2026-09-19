@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
-	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utilites"
+	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utils"
 )
 
 type AlbumUseCase struct {
@@ -34,7 +34,7 @@ func (a *AlbumUseCase) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUID) 
 }
 
 func (a *AlbumUseCase) AddAlbum(ctx context.Context, artistUUID uuid.UUID, albumName string) (*domain.Album, error) {
-	cleanAlN, err := utilites.ValidateAlbumName(albumName)
+	cleanAlN, err := utils.ValidateAlbumName(albumName)
 	if err != nil {
 		return nil, err
 	}

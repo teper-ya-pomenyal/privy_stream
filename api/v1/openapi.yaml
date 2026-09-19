@@ -28,6 +28,7 @@ paths:
           description: Invalid request data
         '409':
           description: A user with this name already exists
+
   /login:
     post:
       summary: Авторизация пользователя
@@ -50,113 +51,32 @@ paths:
         '401':
           description: Invalid username or password
 
-  /tracks/search:
-    get:
-      summary: Поиск треков по названию
-      operationId: searchTracks
-      parameters:
-        - name: track_name
-          in: query
-          required: true
-          schema:
-            type: string
-          example: "Убийца карася"
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 20
-        - name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-      responses:
-        '200':
-          description:  Список найденых треков
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  tracks:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Track'
-
-  /artists/search:
-    get:
-      summary: Поиск артистов по имени
-      operationId: searchArtists
-      parameters:
-        - name: artist_name
-          in: query
-          required: true
-          schema:
-            type: string
-            example: "PlayBoyCalich"
-      responses:
-        '200':
-          description: Список найденых артистов
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  artists:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/LightArtist'
-
-
-  /artists/{artist_id}:
-    get:
-      summary: Получить полную информацию об артисте(с альбомами)
-      operationId: getArtistById
-      parameters:
-        - name: artist_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Полня информация об артисте
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FullArtist'
-        '404':
-          description: Artist not found
-
-  /albums/{album_id}:
-    get:
-      summary: Полная информация об альбоме
-      operationId: getAlbumById
-      parameters:
-        - name: album_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Полная информация об альбоме
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FullAlbum'
-        '404':
-          description: Album not found
-
-  /playlists:
+  /refresh:
     post:
-      summary: Создать плэйлист
-      operationId: createPlaylist
+      summary: Обновить пару access/refresh токенов
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Токены обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Invalid or expired refresh token
+
+  /logout:
+    post:
+      summary: Выйти из аккаунта (инвалидировать refresh-сессию)
+      operationId: logoutUser
       security:
         - bearerAuth: []
       requestBody:
@@ -164,117 +84,320 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - playlist_name
-              properties:
-                playlist_name:
-                  type: string
-                  example: "Моя деревня"
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Сессия завершена
+        '400':
+          description: Invalid request data
+        '401':
+          description: Missing or invalid authorization header
+
+  /catalog/tracks/search:
+    get:
+      summary: Поиск треков по названию
+      operationId: searchTracks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: track_name
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "Убийца карася"
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Список найденных треков
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+        '400':
+          description: track_name is required
+        '401':
+          description: Missing or invalid authorization header
+
+  /catalog/tracks/{track_uuid}:
+    get:
+      summary: Получить путь до файла трека и его длительность
+      operationId: getTrackById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      responses:
+        '200':
+          description: Путь до аудиофайла и длительность
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackPath'
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Track not found
+
+  /catalog/tracks/{track_uuid}/exists:
+    get:
+      summary: Проверить существование трека
+      operationId: trackExists
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      responses:
+        '200':
+          description: Результат проверки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+        '401':
+          description: Missing or invalid authorization header
+
+  /catalog/tracks:
+    post:
+      summary: Добавить трек
+      operationId: addTrack
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTrackRequest'
       responses:
         '201':
-          description: Плейлист создан
+          description: Трек добавлен
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Playlist'
+                $ref: '#/components/schemas/TrackDetails'
+        '400':
+          description: Invalid request data
         '401':
-          description: Unauthorized
+          description: Missing or invalid authorization header
+        '409':
+          description: Track already exists
 
-  /playlists/{playlist_id}:
+  /catalog/artists/search:
     get:
-      summary: Получить плейлист с треками
-      operationId: getPlaylistById
+      summary: Поиск артистов по имени
+      operationId: searchArtists
       security:
         - bearerAuth: []
       parameters:
-        - name: playlist_id
-          in: path
+        - name: artist_name
+          in: query
           required: true
           schema:
             type: string
-            format: uuid
+            example: "PlayBoyCalich"
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
       responses:
         '200':
-          description: Плейлист с треками
+          description: Список найденных артистов
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Playlist'
-        '403':
-          description: The playlist belongs to another user
-        '404':
-          description: Playlist not found
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+        '400':
+          description: artist_name is required
+        '401':
+          description: Missing or invalid authorization header
 
-    delete:
-      summary: Удалить плейлист
-      operationId: deletePlaylist
+  /catalog/artists/{artist_uuid}:
+    get:
+      summary: Получить артиста по ID
+      operationId: getArtistById
       security:
         - bearerAuth: []
       parameters:
-        - name: playlist_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: Плейлист успешно удалён
-        '403':
-          description: The playlist belongs to another user
-        '404':
-          description: Playlist not found
-
-
-  /stream/{track_id}:
-    get:
-      summary: Стриминг аудио трека с поддержкой перемотки (HTTP Range)
-      operationId: streamTrack
-      parameters:
-        - name: track_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: Range
-          in: header
-          required: false
-          schema:
-            type: string
-            example: "bytes=0-1023"
-          description: Запрос на часть файла — браузер шлёт его сам при перемотке
+        - $ref: '#/components/parameters/ArtistUuid'
       responses:
         '200':
-          description: Трек отдан целиком (клиент не прислал Range)
+          description: Артист
           content:
-            audio/mpeg:
+            application/json:
               schema:
-                type: string
-                format: binary
-        '206':
-          description: Отдана часть трека (ответ на Range-запрос)
-          headers:
-            Content-Range:
-              description: Диапазон отданных байт относительно полного размера файла
-              schema:
-                type: string
-                example: "bytes=0-1023/5242880"
-            Accept-Ranges:
-              description: Подтверждение, что сервер поддерживает Range-запросы
-              schema:
-                type: string
-                example: "bytes"
-          content:
-            audio/mpeg:
-              schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Artist'
+        '401':
+          description: Missing or invalid authorization header
         '404':
-          description: Track not found (Streaming Service checked with Catalog via TrackExists)
-        '416':
-          description: The requested range is outside the file size
+          description: Artist not found
+
+  /catalog/artists/{artist_uuid}/albums:
+    get:
+      summary: Получить альбомы артиста
+      operationId: getArtistAlbums
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ArtistUuid'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Список альбомов артиста
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LightAlbum'
+        '401':
+          description: Missing or invalid authorization header
+
+  /catalog/artists/{artist_uuid}/tracks:
+    get:
+      summary: Получить треки артиста
+      operationId: getArtistTracks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ArtistUuid'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Список треков артиста
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LightTrack'
+        '401':
+          description: Missing or invalid authorization header
+
+  /catalog/artists:
+    post:
+      summary: Добавить артиста
+      operationId: addArtist
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddArtistRequest'
+      responses:
+        '201':
+          description: Артист добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Missing or invalid authorization header
+        '409':
+          description: Artist already exists
+
+  /catalog/albums/{album_uuid}:
+    get:
+      summary: Получить альбом по ID
+      operationId: getAlbumById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      responses:
+        '200':
+          description: Альбом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Album not found
+
+  /catalog/albums/{album_uuid}/tracks:
+    get:
+      summary: Получить треки альбома
+      operationId: getAlbumTracks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      responses:
+        '200':
+          description: Список треков альбома
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LightTrack'
+        '401':
+          description: Missing or invalid authorization header
+
+    post:
+      summary: Привязать треки к альбому (с указанием позиции в трек-листе)
+      operationId: addTracksToAlbum
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTracksToAlbumRequest'
+      responses:
+        '200':
+          description: Треки привязаны к альбому
+        '400':
+          description: Invalid request data
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Album or track not found
+        '409':
+          description: Track already in album, or position already taken
+
+  /catalog/albums:
+    post:
+      summary: Добавить альбом
+      operationId: addAlbum
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAlbumRequest'
+      responses:
+        '201':
+          description: Альбом добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Album'
+        '400':
+          description: Invalid request data
+        '401':
+          description: Missing or invalid authorization header
+        '409':
+          description: Album already exists
 
 components:
   securitySchemes:
@@ -282,8 +405,45 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas:
 
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+    TrackUuid:
+      name: track_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ArtistUuid:
+      name: artist_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AlbumUuid:
+      name: album_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
     RegisterRequest:
       type: object
       required:
@@ -317,6 +477,36 @@ components:
           format: password
           minLength: 8
 
+    AuthResponse:
+      type: object
+      properties:
+        user_uuid:
+          type: string
+          format: uuid
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        birth_date:
+          type: string
+          format: date
+
+    RefreshRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+
+    RefreshResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+
     Track:
       type: object
       properties:
@@ -343,7 +533,75 @@ components:
         duration_ms:
           type: integer
 
-    LightArtist:
+    LightTrack:
+      type: object
+      properties:
+        track_uuid:
+          type: string
+          format: uuid
+        track_name:
+          type: string
+          example: "Убийца карася"
+        explicit:
+          type: boolean
+        duration_ms:
+          type: integer
+
+    TrackPath:
+      type: object
+      properties:
+        path:
+          type: string
+        duration_ms:
+          type: integer
+
+    TrackDetails:
+      type: object
+      description: Плоская сущность трека (без артиста/альбома, только связи по id) — то, что реально хранится в таблице tracks
+      properties:
+        track_uuid:
+          type: string
+          format: uuid
+        track_name:
+          type: string
+          example: "Убийца карася"
+        artist_uuid:
+          type: string
+          format: uuid
+        album_uuid:
+          type: string
+          format: uuid
+        explicit:
+          type: boolean
+        path:
+          type: string
+        duration_ms:
+          type: integer
+
+    AddTrackRequest:
+      type: object
+      required:
+        - track_name
+        - artist_uuid
+        - album_uuid
+      properties:
+        track_name:
+          type: string
+          example: "Убийца карася"
+        artist_uuid:
+          type: string
+          format: uuid
+        album_uuid:
+          type: string
+          format: uuid
+        explicit:
+          type: boolean
+        path:
+          type: string
+        duration_ms:
+          type: integer
+
+    Artist:
       type: object
       properties:
         artist_uuid:
@@ -353,19 +611,14 @@ components:
           type: string
           example: "PlayBoyCalich"
 
-    FullArtist:
+    AddArtistRequest:
       type: object
+      required:
+        - artist_name
       properties:
-        artist_uuid:
-          type: string
-          format: uuid
         artist_name:
           type: string
           example: "PlayBoyCalich"
-        albums:
-          type: array
-          items:
-            $ref: '#/components/schemas/LightAlbum'
 
     LightAlbum:
       type: object
@@ -376,61 +629,59 @@ components:
         album_name:
           type: string
           example: "Убийца карася"
+        created_at:
+          type: string
+          format: date-time
 
-    FullAlbum:
+    Album:
       type: object
+      description: Плоская сущность из таблицы albums — треки и данные артиста запрашиваются отдельно (GetAlbumTracks / GetArtistByID)
       properties:
         album_uuid:
+          type: string
+          format: uuid
+        artist_uuid:
           type: string
           format: uuid
         album_name:
           type: string
           example: "Убийца карася"
+        created_at:
+          type: string
+          format: date-time
+
+    AddAlbumRequest:
+      type: object
+      required:
+        - artist_uuid
+        - album_name
+      properties:
         artist_uuid:
           type: string
           format: uuid
-        artist_name:
+        album_name:
           type: string
-          example: "PlayBoyCalich"
-        created_at:
+          example: "Убийца карася"
+
+    AlbumTrackInput:
+      type: object
+      required:
+        - track_uuid
+        - position
+      properties:
+        track_uuid:
           type: string
-          format: date
-          example: "2001-05-04"
+          format: uuid
+        position:
+          type: integer
+          minimum: 1
+
+    AddTracksToAlbumRequest:
+      type: object
+      required:
+        - tracks
+      properties:
         tracks:
           type: array
           items:
-            $ref: '#/components/schemas/Track'
-
-    AuthResponse:
-      type: object
-      properties:
-        user_uuid:
-          type: string
-          format: uuid
-        access_token:
-          type: string
-        refresh_token:
-          type: string
-        birth_date:
-          type: string
-          format: date
-
-    Playlist:
-      type: object
-      properties:
-        playlist_uuid:
-          type: string
-          format: uuid
-        playlist_name:
-          type: string
-          example: "Плейлист для тренировки"
-        owner_id:
-          type: string
-          format: uuid
-        created_at:
-          type: string
-          format: date
-        tracks:
-          type: array
-          items:
-            $ref: '#/components/schemas/Track'
+            $ref: '#/components/schemas/AlbumTrackInput'

@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
-	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utilites"
+	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/utils"
 )
 
 type ArtistUseCase struct {
@@ -21,7 +21,7 @@ func (a *ArtistUseCase) SearchArtist(ctx context.Context, artistName string, lim
 	if limit < 1 || offset < 0 {
 		return nil, domain.ErrInvalidPageParameters
 	}
-	cleanAN, err := utilites.ValidateArtistName(artistName)
+	cleanAN, err := utils.ValidateArtistName(artistName)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (a *ArtistUseCase) GetArtistTracks(ctx context.Context, artistUUID uuid.UUI
 }
 
 func (a *ArtistUseCase) AddArtist(ctx context.Context, artistName string) (*domain.Artist, error) {
-	cleanAN, err := utilites.ValidateArtistName(artistName)
+	cleanAN, err := utils.ValidateArtistName(artistName)
 	if err != nil {
 		return nil, err
 	}
