@@ -23,6 +23,7 @@ func (c *PostgresCatalog) GetAlbumByID(ctx context.Context, albumUUID uuid.UUID)
 	case sql.ErrNoRows:
 		return nil, domain.ErrAlbumNotFound
 	case nil:
+
 		return &album, err
 	default:
 		return nil, err
@@ -69,8 +70,13 @@ func (c *PostgresCatalog) AddAlbum(ctx context.Context, album *domain.Album) err
 		`, album.AlbumUUID, album.ArtistUUID, album.AlbumName, album.CreatedAt)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return domain.ErrAlbumAlreadyExists
+		if errors.As(err, &pgErr) {
+			switch pgErr.Code {
+			case "23505":
+				return domain.ErrAlbumAlreadyExists
+			case "23503":
+				return domain.ErrArtistNotFound
+			}
 		}
 		return err
 	}

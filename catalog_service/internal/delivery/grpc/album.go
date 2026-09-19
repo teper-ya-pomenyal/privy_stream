@@ -56,6 +56,8 @@ func (h *CatalogGRPCHandler) GetAlbumTracks(ctx context.Context, req *catalogv1.
 	return &catalogv1.GetAlbumTracksResponse{LightTrack: respTracks}, nil
 }
 
+//////////////////////////////////////////
+
 func (h *CatalogGRPCHandler) AddAlbum(ctx context.Context, req *catalogv1.AddAlbumRequest) (*catalogv1.AddAlbumResponse, error) {
 	if req.ArtistUuid == "" || req.AlbumName == "" {
 		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())

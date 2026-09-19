@@ -33,6 +33,8 @@ func (a *AlbumUseCase) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUID) 
 	return tracks, nil
 }
 
+///////////////////////////////////////
+
 func (a *AlbumUseCase) AddAlbum(ctx context.Context, artistUUID uuid.UUID, albumName string) (*domain.Album, error) {
 	cleanAlN, err := utils.ValidateAlbumName(albumName)
 	if err != nil {

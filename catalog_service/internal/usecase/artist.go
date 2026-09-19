@@ -63,6 +63,8 @@ func (a *ArtistUseCase) GetArtistTracks(ctx context.Context, artistUUID uuid.UUI
 	return tracks, nil
 }
 
+///////////////////////////////////////////////
+
 func (a *ArtistUseCase) AddArtist(ctx context.Context, artistName string) (*domain.Artist, error) {
 	cleanAN, err := utils.ValidateArtistName(artistName)
 	if err != nil {
