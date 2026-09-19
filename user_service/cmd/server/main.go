@@ -44,7 +44,7 @@ func main() {
 
 	login := usecase.NewLoginUseCase(userRepo, tokenManager, userCache)
 	register := usecase.NewRegisterUseCase(userRepo, tokenManager, userCache)
-	refresh := usecase.NewRefreshUseCase(tokenManager, userCache)
+	refresh := usecase.NewRefreshUseCase(userRepo, tokenManager, userCache)
 	logout := usecase.NewLogoutUseCase(userCache)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)

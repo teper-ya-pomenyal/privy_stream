@@ -54,7 +54,7 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 
 	//make session
 
-	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID)
+	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID, user.BirthDate)
 	if err != nil {
 		return nil, err
 	}

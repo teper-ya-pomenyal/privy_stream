@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -45,6 +46,23 @@ func (p *UsersPostgresRepository) GetUserByUserName(ctx context.Context, userNam
 	err := p.conn.GetContext(ctx, user,
 		"SELECT uuid, user_name, password_hash, birth_date, created_at FROM users WHERE user_name = $1",
 		userName,
+	)
+	switch err {
+	case sql.ErrNoRows:
+		return nil, domain.ErrUserNotFound
+	case nil:
+		return user, nil
+	default:
+		return nil, err
+	}
+
+}
+
+func (p *UsersPostgresRepository) GetUserByID(ctx context.Context, userUUID uuid.UUID) (*domain.User, error) {
+	user := &domain.User{}
+	err := p.conn.GetContext(ctx, user,
+		"SELECT uuid, user_name, password_hash, birth_date, created_at FROM users WHERE uuid = $1",
+		userUUID,
 	)
 	switch err {
 	case sql.ErrNoRows:

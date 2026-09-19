@@ -17,10 +17,10 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 		UPDATE tracks
 		SET listened = listened + 1
 		WHERE track_id = $1
-		RETURNING path, duration_ms
+		RETURNING path, duration_ms, explicit
 		`,
 		trackUUID,
-	).Scan(&trackPath.Path, &trackPath.DurationMS)
+	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit)
 	switch err {
 	case sql.ErrNoRows:
 		return nil, domain.ErrTrackNotFound

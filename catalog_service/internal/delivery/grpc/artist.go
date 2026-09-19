@@ -92,6 +92,8 @@ func (h *CatalogGRPCHandler) GetArtistTracks(ctx context.Context, req *catalogv1
 	return &catalogv1.GetArtistTracksResponse{ArtistTracks: respTracks}, nil
 }
 
+//////////////////////////////////////////
+
 func (h *CatalogGRPCHandler) AddArtist(ctx context.Context, req *catalogv1.AddArtistRequest) (*catalogv1.AddArtistResponse, error) {
 	if req.ArtistName == "" {
 		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())

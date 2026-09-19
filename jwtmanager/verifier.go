@@ -15,8 +15,8 @@ func NewVerifier(publicKey *rsa.PublicKey) *Verifier {
 	return &Verifier{publicKey: publicKey}
 }
 
-func (v *Verifier) VerifyAccessToken(tokenString string) (*jwt.RegisteredClaims, error) {
-	claims := &jwt.RegisteredClaims{}
+func (v *Verifier) VerifyAccessToken(tokenString string) (*AccessClaims, error) {
+	claims := &AccessClaims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {

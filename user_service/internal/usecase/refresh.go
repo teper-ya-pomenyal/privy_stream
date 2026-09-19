@@ -12,12 +12,14 @@ type RefreshResult struct {
 }
 
 type RefreshUseCase struct {
+	repo           domain.UsersRepository
 	tokenManager   TokenManager
 	sessionManager SessionStore
 }
 
-func NewRefreshUseCase(tokenManager TokenManager, sessionManager SessionStore) *RefreshUseCase {
+func NewRefreshUseCase(repo domain.UsersRepository, tokenManager TokenManager, sessionManager SessionStore) *RefreshUseCase {
 	return &RefreshUseCase{
+		repo:           repo,
 		tokenManager:   tokenManager,
 		sessionManager: sessionManager,
 	}
@@ -33,13 +35,18 @@ func (r *RefreshUseCase) Refresh(ctx context.Context, refreshToken string) (*Ref
 		return &RefreshResult{}, err
 	}
 
+	user, err := r.repo.GetUserByID(ctx, userUUID)
+	if err != nil {
+		return &RefreshResult{}, err
+	}
+
 	// make response
 	newRefreshToken, err := r.tokenManager.NewRefreshToken()
 	if err != nil {
 		return &RefreshResult{}, err
 	}
 
-	newAccessToken, err := r.tokenManager.NewAccessToken(userUUID)
+	newAccessToken, err := r.tokenManager.NewAccessToken(userUUID, user.BirthDate)
 	if err != nil {
 		return &RefreshResult{}, err
 	}

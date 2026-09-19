@@ -26,6 +26,7 @@ func (h *CatalogGRPCHandler) GetTrackByID(ctx context.Context, req *catalogv1.Ge
 	return &catalogv1.GetTrackByIDResponse{
 		Path:       trackPath.Path,
 		DurationMs: int32(trackPath.DurationMS),
+		Explicit:   trackPath.Explicit,
 	}, nil
 }
 

@@ -45,6 +45,8 @@ func (t *TrackUseCase) SearchTracks(ctx context.Context, trackName string, limit
 	return tracks, nil
 }
 
+////////////////////////////////////////////////////
+
 func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUID, albumUUID uuid.UUID, explicit bool, path string, durationMS time.Duration) (*domain.Track, error) {
 	cleanTN, err := utils.ValidateTrackName(trackName)
 	if err != nil {

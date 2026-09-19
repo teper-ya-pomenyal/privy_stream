@@ -19,11 +19,14 @@ func NewManager(privateKey *rsa.PrivateKey, accessTTL time.Duration) *Manager {
 	return &Manager{privateKey: privateKey, accessTTL: accessTTL}
 }
 
-func (m *Manager) NewAccessToken(userUUID uuid.UUID) (string, error) {
-	claims := jwt.RegisteredClaims{
-		Subject:   userUUID.String(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.accessTTL)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+func (m *Manager) NewAccessToken(userUUID uuid.UUID, birthDate time.Time) (string, error) {
+	claims := AccessClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userUUID.String(),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.accessTTL)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+		BirthDate: birthDate,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(m.privateKey)

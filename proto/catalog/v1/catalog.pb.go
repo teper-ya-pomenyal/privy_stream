@@ -787,11 +787,13 @@ func (x *GetTrackByIDRequest) GetTrackUuid() string {
 }
 
 // так как это будет использоваться только для стриминг сервиса,
-// удалил информацию, которая ему не нужна
+// оставил только то, что ему нужно: путь до файла, длительность
+// и explicit (для проверки возрастных ограничений)
 type GetTrackByIDResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
 	DurationMs    int32                  `protobuf:"varint,2,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	Explicit      bool                   `protobuf:"varint,3,opt,name=explicit,proto3" json:"explicit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -838,6 +840,13 @@ func (x *GetTrackByIDResponse) GetDurationMs() int32 {
 		return x.DurationMs
 	}
 	return 0
+}
+
+func (x *GetTrackByIDResponse) GetExplicit() bool {
+	if x != nil {
+		return x.Explicit
+	}
+	return false
 }
 
 type TrackExistsRequest struct {
@@ -1983,11 +1992,12 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\rartist_albums\x18\x01 \x03(\v2\x16.catalog.v1.LightAlbumR\fartistAlbums\"4\n" +
 	"\x13GetTrackByIDRequest\x12\x1d\n" +
 	"\n" +
-	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"K\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"g\n" +
 	"\x14GetTrackByIDResponse\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x1f\n" +
 	"\vduration_ms\x18\x02 \x01(\x05R\n" +
-	"durationMs\"3\n" +
+	"durationMs\x12\x1a\n" +
+	"\bexplicit\x18\x03 \x01(\bR\bexplicit\"3\n" +
 	"\x12TrackExistsRequest\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"-\n" +

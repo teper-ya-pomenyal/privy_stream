@@ -107,10 +107,12 @@ message GetTrackByIDRequest {
 
 
 // так как это будет использоваться только для стриминг сервиса,
-// удалил информацию, которая ему не нужна
+// оставил только то, что ему нужно: путь до файла, длительность
+// и explicit (для проверки возрастных ограничений)
 message GetTrackByIDResponse {
     string path = 1;
     int32 duration_ms = 2;
+    bool explicit = 3;
 }
 
 

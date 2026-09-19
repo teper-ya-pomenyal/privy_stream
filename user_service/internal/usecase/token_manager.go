@@ -1,8 +1,12 @@
 package usecase
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type TokenManager interface {
-	NewAccessToken(userUUID uuid.UUID) (string, error)
+	NewAccessToken(userUUID uuid.UUID, birthDate time.Time) (string, error)
 	NewRefreshToken() (string, error)
 }

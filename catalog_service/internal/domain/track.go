@@ -22,6 +22,7 @@ type Track struct {
 type TrackPath struct {
 	Path       string        `db:"path"`
 	DurationMS time.Duration `db:"duration_ms"`
+	Explicit   bool          `db:"explicit"`
 }
 
 type LightTrack struct {

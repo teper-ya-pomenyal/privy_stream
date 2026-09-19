@@ -67,7 +67,7 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 
 	//make session
 
-	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID)
+	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID, newUser.BirthDate)
 	if err != nil {
 		return &LoginResult{}, err
 	}
