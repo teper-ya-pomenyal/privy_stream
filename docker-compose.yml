@@ -107,11 +107,17 @@ services:
       - catalog_service
 
   streaming_service:
+    environment:
+      STREAMING_SERVICE_PORT: ${STREAMING_SERVICE_PORT:-50054}
+      CATALOG_SERVICE_ADDRESS: catalog_service:${CATALOG_SERVICE_PORT:-50053}
+      TRACK_STORAGE_PATH: /data/tracks
     build:
       context: .
       dockerfile: streaming_service/Dockerfile
     volumes:
       - tracks_storage:/data/tracks
+    depends_on:
+      - catalog_service
 
   user_service:
     environment:

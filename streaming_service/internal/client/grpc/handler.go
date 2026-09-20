@@ -9,7 +9,7 @@ type CatalogClient struct {
 	client catalogv1.CatalogServiceClient
 }
 
-func NewCatalogClient(conn *grpc.ClientConn, client catalogv1.CatalogServiceClient) *CatalogClient {
+func NewCatalogClient(conn *grpc.ClientConn) *CatalogClient {
 	return &CatalogClient{client: catalogv1.NewCatalogServiceClient(conn)}
 }
 

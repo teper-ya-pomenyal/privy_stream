@@ -47,7 +47,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("gateway listening on :%s", cfg.Port)
+		log.Printf("gateway listening on :%s\n", cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("failed to serve: %v", err)
 		}
@@ -57,8 +57,8 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	ctx, cansel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cansel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Printf("gateway остановлен по таймауту: %v", err)
 	} else {

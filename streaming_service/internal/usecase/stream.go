@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/teper-ya-pomenyal/privy_stream/streaming_service/internal/delivery/grpc"
+	"github.com/teper-ya-pomenyal/privy_stream/streaming_service/internal/client/grpc"
 	"github.com/teper-ya-pomenyal/privy_stream/streaming_service/internal/domain"
 	"github.com/teper-ya-pomenyal/privy_stream/streaming_service/internal/storage"
 )
