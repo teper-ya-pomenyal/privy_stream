@@ -13,14 +13,18 @@ service CatalogService {
     rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse); //✔️☑️
     rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse); //✔️☑️
 
+//  rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
+//  rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
+//  rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
+}
+
+// вынесен в отдельный gRPC-сервис (свой порт), чтобы write-путь
+// можно было изолировать от read-пути на уровне сети
+service CatalogWriteService {
     rpc AddArtist(AddArtistRequest) returns (AddArtistResponse);
     rpc AddAlbum(AddAlbumRequest) returns (AddAlbumResponse);
     rpc AddTrack(AddTrackRequest) returns (AddTrackResponse);
     rpc AddTracksToAlbum(AddTracksToAlbumRequest) returns (AddTracksToAlbumResponse);
-
-//  rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
-//  rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
-//  rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
 }
 
 // структуры для клиента

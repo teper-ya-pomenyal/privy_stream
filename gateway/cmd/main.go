@@ -13,6 +13,7 @@ import (
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/config"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/handlers"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/middlewares"
+	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/storage"
 	"github.com/teper-ya-pomenyal/privy_stream/jwtmanager"
 )
 
@@ -23,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	catalogClient, err := clients.NewCatalogClient(cfg.CatalogServiceAddress)
+	catalogClient, err := clients.NewCatalogClient(cfg.CatalogServiceAddress, cfg.CatalogWriteServiceAddress)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,11 +36,15 @@ func main() {
 	verifier := jwtmanager.NewVerifier(publicKey)
 	mw := middlewares.NewMiddleWares(verifier)
 
+	trackStorage := storage.NewTrackStorage(cfg.TrackStoragePath)
+
 	userHandler := handlers.NewUserHandler(userClient)
-	catalogHandler := handlers.NewCatalogHandler(catalogClient)
+	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage)
+	streamingRouter := handlers.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
 
 	router := userHandler.NewRouter(mw)
 	catalogHandler.MountRoutes(router, mw)
+	router.Mount("/", streamingRouter)
 
 	srv := http.Server{
 		Addr:    ":" + cfg.Port,

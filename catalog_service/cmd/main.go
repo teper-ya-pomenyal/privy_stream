@@ -29,8 +29,13 @@ func main() {
 	albumUseCase := usecase.NewAlbumUseCase(repo)
 
 	catalogHandler := handler.NewCatalogGRPCHandler(trackUseCase, artistUseCase, albumUseCase)
+	catalogWriteHandler := handler.NewCatalogWriteGRPCHandler(trackUseCase, artistUseCase, albumUseCase)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)
+	if err != nil {
+		log.Fatal(err)
+	}
+	writeLis, err := net.Listen("tcp", ":"+cfg.WritePort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,9 +44,17 @@ func main() {
 	grpcServer := grpc.NewServer(interceptors)
 	catalogv1.RegisterCatalogServiceServer(grpcServer, catalogHandler)
 
+	grpcWriteServer := grpc.NewServer(interceptors)
+	catalogv1.RegisterCatalogWriteServiceServer(grpcWriteServer, catalogWriteHandler)
+
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+	go func() {
+		if err := grpcWriteServer.Serve(writeLis); err != nil {
+			log.Fatalf("failed to serve write: %v", err)
 		}
 	}()
 
@@ -52,6 +65,7 @@ func main() {
 	grpcDone := make(chan struct{})
 	go func() {
 		grpcServer.GracefulStop()
+		grpcWriteServer.GracefulStop()
 		close(grpcDone)
 	}()
 

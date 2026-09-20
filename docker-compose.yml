@@ -76,6 +76,7 @@ services:
   catalog_service:
     environment:
       CATALOG_SERVICE_PORT: ${CATALOG_SERVICE_PORT:-50053}
+      CATALOG_WRITE_SERVICE_PORT: ${CATALOG_WRITE_SERVICE_PORT:-50056}
       CATALOG_DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-catalog:5432/${POSTGRES_DB_CATALOG:-catalog_db}?sslmode=disable"
     build:
       context: .
@@ -93,7 +94,10 @@ services:
       PORT: "8080"
       USER_SERVICE_ADDRESS: user_service:${PORT}
       CATALOG_SERVICE_ADDRESS: catalog_service:${CATALOG_SERVICE_PORT:-50053}
+      CATALOG_WRITE_SERVICE_ADDRESS: catalog_service:${CATALOG_WRITE_SERVICE_PORT:-50056}
+      STREAMING_SERVICE_ADDRESS: streaming_service:${STREAMING_SERVICE_PORT:-50054}
       PUBLIC_KEY_ADDRESS: /keys/public.pem
+      TRACK_STORAGE_PATH: /data/tracks
     ports:
     - "8080:8080"
     build:

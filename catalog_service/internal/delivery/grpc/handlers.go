@@ -19,3 +19,18 @@ func NewCatalogGRPCHandler(trackUseCase *usecase.TrackUseCase, artistUseCase *us
 		albumUseCase:  albumUseCase,
 	}
 }
+
+type CatalogWriteGRPCHandler struct {
+	catalogv1.UnimplementedCatalogWriteServiceServer
+	trackUseCase  *usecase.TrackUseCase
+	artistUseCase *usecase.ArtistUseCase
+	albumUseCase  *usecase.AlbumUseCase
+}
+
+func NewCatalogWriteGRPCHandler(trackUseCase *usecase.TrackUseCase, artistUseCase *usecase.ArtistUseCase, albumUseCase *usecase.AlbumUseCase) *CatalogWriteGRPCHandler {
+	return &CatalogWriteGRPCHandler{
+		trackUseCase:  trackUseCase,
+		artistUseCase: artistUseCase,
+		albumUseCase:  albumUseCase,
+	}
+}

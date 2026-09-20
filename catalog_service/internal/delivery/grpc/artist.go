@@ -91,21 +91,3 @@ func (h *CatalogGRPCHandler) GetArtistTracks(ctx context.Context, req *catalogv1
 	}
 	return &catalogv1.GetArtistTracksResponse{ArtistTracks: respTracks}, nil
 }
-
-//////////////////////////////////////////
-
-func (h *CatalogGRPCHandler) AddArtist(ctx context.Context, req *catalogv1.AddArtistRequest) (*catalogv1.AddArtistResponse, error) {
-	if req.ArtistName == "" {
-		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
-	}
-	artist, err := h.artistUseCase.AddArtist(ctx, req.ArtistName)
-	if err != nil {
-		return nil, mapDomainError(err)
-	}
-	return &catalogv1.AddArtistResponse{
-		Artist: &catalogv1.Artist{
-			ArtistUuid: artist.ArtistUUID.String(),
-			ArtistName: artist.ArtistName,
-		},
-	}, nil
-}

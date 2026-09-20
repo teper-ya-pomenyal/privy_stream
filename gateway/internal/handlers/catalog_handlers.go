@@ -7,16 +7,19 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/clients"
+	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/storage"
 )
 
 const defaultPageLimit = 20
+const maxTrackFileMemory = 32 << 20
 
 type CatalogHandler struct {
 	catalogClient *clients.CatalogClient
+	trackStorage  *storage.TrackStorage
 }
 
-func NewCatalogHandler(catalogClient *clients.CatalogClient) *CatalogHandler {
-	return &CatalogHandler{catalogClient: catalogClient}
+func NewCatalogHandler(catalogClient *clients.CatalogClient, trackStorage *storage.TrackStorage) *CatalogHandler {
+	return &CatalogHandler{catalogClient: catalogClient, trackStorage: trackStorage}
 }
 
 func parsePageParams(r *http.Request) (int32, int32) {
@@ -228,4 +231,31 @@ func (h *CatalogHandler) AddTracksToAlbum(w http.ResponseWriter, r *http.Request
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *CatalogHandler) AddTrackFile(w http.ResponseWriter, r *http.Request) {
+	trackUUID := chi.URLParam(r, "track_uuid")
+	track, err := h.catalogClient.GetTrackByID(r.Context(), trackUUID)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+
+	if err := r.ParseMultipartForm(maxTrackFileMemory); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	size, err := h.trackStorage.AddTrackFile(track.Path, file)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"path": track.Path, "size": size})
 }

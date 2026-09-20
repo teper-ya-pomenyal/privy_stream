@@ -6,14 +6,16 @@ import (
 )
 
 type Config struct {
-	Port string
-	DSN  string
+	Port      string
+	WritePort string
+	DSN       string
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		Port: mustGetEnv("CATALOG_SERVICE_PORT"),
-		DSN:  mustGetEnv("CATALOG_DB_DSN"),
+		Port:      mustGetEnv("CATALOG_SERVICE_PORT"),
+		WritePort: mustGetEnv("CATALOG_WRITE_SERVICE_PORT"),
+		DSN:       mustGetEnv("CATALOG_DB_DSN"),
 	}
 }
 

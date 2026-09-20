@@ -2075,7 +2075,7 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"album_uuid\x18\x01 \x01(\tR\talbumUuid\x123\n" +
 	"\x06tracks\x18\x02 \x03(\v2\x1b.catalog.v1.AlbumTrackInputR\x06tracks\"\x1a\n" +
-	"\x18AddTracksToAlbumResponse2\xc7\b\n" +
+	"\x18AddTracksToAlbumResponse2\x90\x06\n" +
 	"\x0eCatalogService\x12Q\n" +
 	"\fGetTrackByID\x12\x1f.catalog.v1.GetTrackByIDRequest\x1a .catalog.v1.GetTrackByIDResponse\x12N\n" +
 	"\vTrackExists\x12\x1e.catalog.v1.TrackExistsRequest\x1a\x1f.catalog.v1.TrackExistsResponse\x12N\n" +
@@ -2085,7 +2085,8 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x0fGetArtistAlbums\x12\".catalog.v1.GetArtistAlbumsRequest\x1a#.catalog.v1.GetArtistAlbumsResponse\x12Z\n" +
 	"\x0fGetArtistTracks\x12\".catalog.v1.GetArtistTracksRequest\x1a#.catalog.v1.GetArtistTracksResponse\x12Q\n" +
 	"\fGetAlbumByID\x12\x1f.catalog.v1.GetAlbumByIDRequest\x1a .catalog.v1.GetAlbumByIDResponse\x12W\n" +
-	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse\x12H\n" +
+	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xcc\x02\n" +
+	"\x13CatalogWriteService\x12H\n" +
 	"\tAddArtist\x12\x1c.catalog.v1.AddArtistRequest\x1a\x1d.catalog.v1.AddArtistResponse\x12E\n" +
 	"\bAddAlbum\x12\x1b.catalog.v1.AddAlbumRequest\x1a\x1c.catalog.v1.AddAlbumResponse\x12E\n" +
 	"\bAddTrack\x12\x1b.catalog.v1.AddTrackRequest\x1a\x1c.catalog.v1.AddTrackResponse\x12]\n" +
@@ -2163,10 +2164,10 @@ var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	6,  // 18: catalog.v1.CatalogService.GetArtistTracks:input_type -> catalog.v1.GetArtistTracksRequest
 	24, // 19: catalog.v1.CatalogService.GetAlbumByID:input_type -> catalog.v1.GetAlbumByIDRequest
 	8,  // 20: catalog.v1.CatalogService.GetAlbumTracks:input_type -> catalog.v1.GetAlbumTracksRequest
-	26, // 21: catalog.v1.CatalogService.AddArtist:input_type -> catalog.v1.AddArtistRequest
-	28, // 22: catalog.v1.CatalogService.AddAlbum:input_type -> catalog.v1.AddAlbumRequest
-	30, // 23: catalog.v1.CatalogService.AddTrack:input_type -> catalog.v1.AddTrackRequest
-	33, // 24: catalog.v1.CatalogService.AddTracksToAlbum:input_type -> catalog.v1.AddTracksToAlbumRequest
+	26, // 21: catalog.v1.CatalogWriteService.AddArtist:input_type -> catalog.v1.AddArtistRequest
+	28, // 22: catalog.v1.CatalogWriteService.AddAlbum:input_type -> catalog.v1.AddAlbumRequest
+	30, // 23: catalog.v1.CatalogWriteService.AddTrack:input_type -> catalog.v1.AddTrackRequest
+	33, // 24: catalog.v1.CatalogWriteService.AddTracksToAlbum:input_type -> catalog.v1.AddTracksToAlbumRequest
 	13, // 25: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
 	15, // 26: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
 	16, // 27: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
@@ -2176,10 +2177,10 @@ var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	7,  // 31: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
 	25, // 32: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
 	9,  // 33: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
-	27, // 34: catalog.v1.CatalogService.AddArtist:output_type -> catalog.v1.AddArtistResponse
-	29, // 35: catalog.v1.CatalogService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
-	31, // 36: catalog.v1.CatalogService.AddTrack:output_type -> catalog.v1.AddTrackResponse
-	34, // 37: catalog.v1.CatalogService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
+	27, // 34: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
+	29, // 35: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
+	31, // 36: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
+	34, // 37: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
 	25, // [25:38] is the sub-list for method output_type
 	12, // [12:25] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
@@ -2200,7 +2201,7 @@ func file_proto_catalog_v1_catalog_proto_init() {
 			NumEnums:      0,
 			NumMessages:   35,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_proto_catalog_v1_catalog_proto_goTypes,
 		DependencyIndexes: file_proto_catalog_v1_catalog_proto_depIdxs,

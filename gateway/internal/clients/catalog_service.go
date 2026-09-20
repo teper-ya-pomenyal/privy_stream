@@ -65,16 +65,27 @@ type AlbumTrackInput struct {
 }
 
 type CatalogClient struct {
-	conn       *grpc.ClientConn
-	grpcClient catalogv1.CatalogServiceClient
+	conn            *grpc.ClientConn
+	writeConn       *grpc.ClientConn
+	grpcClient      catalogv1.CatalogServiceClient
+	grpcWriteClient catalogv1.CatalogWriteServiceClient
 }
 
-func NewCatalogClient(address string) (*CatalogClient, error) {
+func NewCatalogClient(address, writeAddress string) (*CatalogClient, error) {
 	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
-	return &CatalogClient{conn: conn, grpcClient: catalogv1.NewCatalogServiceClient(conn)}, nil
+	writeConn, err := grpc.NewClient(writeAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return &CatalogClient{
+		conn:            conn,
+		writeConn:       writeConn,
+		grpcClient:      catalogv1.NewCatalogServiceClient(conn),
+		grpcWriteClient: catalogv1.NewCatalogWriteServiceClient(writeConn),
+	}, nil
 }
 
 func (c *CatalogClient) GetTrackByID(ctx context.Context, trackUUID string) (*TrackPath, error) {
@@ -184,7 +195,7 @@ func (c *CatalogClient) GetAlbumTracks(ctx context.Context, albumUUID string) ([
 }
 
 func (c *CatalogClient) AddArtist(ctx context.Context, artistName string) (*Artist, error) {
-	res, err := c.grpcClient.AddArtist(ctx, &catalogv1.AddArtistRequest{ArtistName: artistName})
+	res, err := c.grpcWriteClient.AddArtist(ctx, &catalogv1.AddArtistRequest{ArtistName: artistName})
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +203,7 @@ func (c *CatalogClient) AddArtist(ctx context.Context, artistName string) (*Arti
 }
 
 func (c *CatalogClient) AddAlbum(ctx context.Context, artistUUID, albumName string) (*Album, error) {
-	res, err := c.grpcClient.AddAlbum(ctx, &catalogv1.AddAlbumRequest{ArtistUuid: artistUUID, AlbumName: albumName})
+	res, err := c.grpcWriteClient.AddAlbum(ctx, &catalogv1.AddAlbumRequest{ArtistUuid: artistUUID, AlbumName: albumName})
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +216,7 @@ func (c *CatalogClient) AddAlbum(ctx context.Context, artistUUID, albumName stri
 }
 
 func (c *CatalogClient) AddTrack(ctx context.Context, trackName, artistUUID, albumUUID string, explicit bool, path string, durationMs int32) (*TrackDetails, error) {
-	res, err := c.grpcClient.AddTrack(ctx, &catalogv1.AddTrackRequest{
+	res, err := c.grpcWriteClient.AddTrack(ctx, &catalogv1.AddTrackRequest{
 		TrackName:  trackName,
 		ArtistUuid: artistUUID,
 		AlbumUuid:  albumUUID,
@@ -232,6 +243,6 @@ func (c *CatalogClient) AddTracksToAlbum(ctx context.Context, albumUUID string, 
 	for _, t := range tracks {
 		reqTracks = append(reqTracks, &catalogv1.AlbumTrackInput{TrackUuid: t.TrackUUID, Position: t.Position})
 	}
-	_, err := c.grpcClient.AddTracksToAlbum(ctx, &catalogv1.AddTracksToAlbumRequest{AlbumUuid: albumUUID, Tracks: reqTracks})
+	_, err := c.grpcWriteClient.AddTracksToAlbum(ctx, &catalogv1.AddTracksToAlbumRequest{AlbumUuid: albumUUID, Tracks: reqTracks})
 	return err
 }
