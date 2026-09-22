@@ -32,12 +32,15 @@ func (c *PostgresCatalog) GetAlbumByID(ctx context.Context, albumUUID uuid.UUID)
 }
 
 func (c *PostgresCatalog) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUID) ([]domain.LightAlbumTrack, error) {
+	// Трек принадлежит альбому либо через tracks.album_id (задаётся при AddTrack),
+	// либо через albums_tracks (AddTracksToAlbum, там же позиция в трек-листе).
+	// Учитываем оба источника: треки без позиции идут после пронумерованных.
 	rows, err := c.conn.QueryContext(ctx, `
-		SELECT at.track_id, t.track_name, t.explicit, t.duration_ms, at.position
-		FROM albums_tracks at
-		JOIN tracks t ON t.track_id = at.track_id
-		WHERE at.album_id = $1
-		ORDER BY at.position ASC
+		SELECT t.track_id, t.track_name, t.explicit, t.duration_ms, COALESCE(at.position, 0)
+		FROM tracks t
+		LEFT JOIN albums_tracks at ON at.track_id = t.track_id AND at.album_id = $1
+		WHERE t.album_id = $1 OR at.album_id IS NOT NULL
+		ORDER BY at.position ASC NULLS LAST, t.created_at ASC
 		`,
 		albumUUID,
 	)

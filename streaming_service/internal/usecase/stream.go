@@ -25,9 +25,13 @@ func NewStreamer(storagePath string) *Streamer {
 	return &Streamer{trackStoragePath: storagePath}
 }
 
+// isAdult — исполнилось ли 18 полных лет на момент now.
+func isAdult(birthDate, now time.Time) bool {
+	return !now.Before(birthDate.AddDate(18, 0, 0))
+}
+
 func (s *Streamer) StreamTrack(tl *grpc.TrackLocation, bd time.Time) (*StreamTrackResponse, error) {
-	oldYear := time.Now().Year() - bd.Year()
-	if oldYear < 18 && tl.Explicit {
+	if tl.Explicit && !isAdult(bd, time.Now()) {
 		return nil, domain.ErrExplicitContentBlocked
 	}
 	trackPath := filepath.Join(s.trackStoragePath, tl.Path)

@@ -74,7 +74,7 @@ func (c *PostgresCatalog) GetArtistTracks(ctx context.Context, artistUUID uuid.U
 		SELECT track_id, track_name, explicit, duration_ms
 		FROM tracks
 		WHERE artist_id = $1
-		ORDER BY listened DESC
+		ORDER BY listened DESC NULLS LAST
 		LIMIT $2 OFFSET $3
 		`,
 		artistUUID, limit, offset,

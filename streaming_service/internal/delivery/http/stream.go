@@ -47,6 +47,10 @@ func (h *HTTPHandlers) StreamTrack(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "explicit content blocked", http.StatusForbidden)
 			log.Println(err)
 			return
+		case errors.Is(err, domain.ErrFileNotExists):
+			http.Error(w, "track file not found", http.StatusNotFound)
+			log.Println(err)
+			return
 		default:
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			log.Println(err)

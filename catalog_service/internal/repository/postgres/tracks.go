@@ -15,7 +15,7 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 
 	err := c.conn.QueryRowContext(ctx, `
 		UPDATE tracks
-		SET listened = listened + 1
+		SET listened = COALESCE(listened, 0) + 1
 		WHERE track_id = $1
 		RETURNING path, duration_ms, explicit
 		`,
@@ -35,12 +35,12 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 	rows, err := c.conn.QueryContext(ctx, `
 		SELECT
 			t.track_id, t.track_name, t.artist_id, ar.artist_name,
-		 	t.album_id, al.album_name, t.explicit, t.created_at
+		 	t.album_id, al.album_name, t.explicit, t.created_at, t.duration_ms
 		FROM tracks t
 		JOIN artists ar ON ar.artist_id = t.artist_id
 		JOIN albums al ON al.album_id = t.album_id
 		WHERE t.track_name ILIKE '%' || $1 || '%' ESCAPE '\'
-		ORDER BY t.listened DESC
+		ORDER BY t.listened DESC NULLS LAST
 		LIMIT $2 OFFSET $3
 		`,
 		trackName, limit, offset,
@@ -55,7 +55,7 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 		var t domain.Track
 		if err := rows.Scan(
 			&t.TrackID, &t.TrackName, &t.ArtistID, &t.ArtistName,
-			&t.AlbumID, &t.AlbumName, &t.Explicit, &t.CreatedAt,
+			&t.AlbumID, &t.AlbumName, &t.Explicit, &t.CreatedAt, &t.DurationMS,
 		); err != nil {
 			return nil, err
 		}
