@@ -189,6 +189,83 @@ paths:
         '409':
           description: Track already exists
 
+  /catalog/tracks/{track_uuid}/file:
+    post:
+      summary: Загрузить аудиофайл трека
+      operationId: addTrackFile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Файл загружен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  size:
+                    type: integer
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Track not found
+        '500':
+          description: Internal server error
+
+  /stream/{track_uuid}:
+    get:
+      summary: Стримить аудиофайл трека (поддерживает Range-запросы)
+      operationId: streamTrack
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+        - name: Range
+          in: header
+          required: false
+          schema:
+            type: string
+          example: "bytes=0-1023"
+      responses:
+        '200':
+          description: Аудиофайл целиком
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '206':
+          description: Часть аудиофайла (при наличии заголовка Range)
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: Explicit content blocked for this user
+        '404':
+          description: Track not found
+
   /catalog/artists/search:
     get:
       summary: Поиск артистов по имени
@@ -259,6 +336,20 @@ paths:
                   $ref: '#/components/schemas/LightAlbum'
         '401':
           description: Missing or invalid authorization header
+
+  /catalog/tracks/{track_uuid}/listened:
+    post:
+      summary: Засчитать прослушивание трека
+      operationId: markTrackListened
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      responses:
+        '204': { description: Прослушивание засчитано }
+        '400': { description: invalid uuid }
+        '401': { description: Missing or invalid authorization header }
+        '404': { description: Track not found }
 
   /catalog/artists/{artist_uuid}/tracks:
     get:

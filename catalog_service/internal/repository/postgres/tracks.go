@@ -14,10 +14,9 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 	trackPath := &domain.TrackPath{}
 
 	err := c.conn.QueryRowContext(ctx, `
-		UPDATE tracks
-		SET listened = COALESCE(listened, 0) + 1
+		SELECT (path, duration_ms, explicit)
+		FROM tracks
 		WHERE track_id = $1
-		RETURNING path, duration_ms, explicit
 		`,
 		trackUUID,
 	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit)
@@ -107,4 +106,21 @@ func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) err
 	}
 
 	return nil
+}
+
+func (c *PostgresCatalog) IncrementListened(ctx context.Context, trackUUID uuid.UUID) error {
+	_, err := c.conn.QueryContext(ctx, `
+		UPDADE tracks
+		SET listened = COALESCE(listened, 0) + 1
+		WHERE track_id = $1
+		`)
+
+	switch err {
+	case sql.ErrNoRows:
+		return domain.ErrTrackNotFound
+	case nil:
+		return nil
+	default:
+		return err
+	}
 }
