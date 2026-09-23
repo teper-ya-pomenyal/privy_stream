@@ -246,3 +246,8 @@ func (c *CatalogClient) AddTracksToAlbum(ctx context.Context, albumUUID string, 
 	_, err := c.grpcWriteClient.AddTracksToAlbum(ctx, &catalogv1.AddTracksToAlbumRequest{AlbumUuid: albumUUID, Tracks: reqTracks})
 	return err
 }
+
+func (c *CatalogClient) IncrementListened(ctx context.Context, trackUUID string) error {
+	_, err := c.grpcWriteClient.IncrementListened(ctx, &catalogv1.IncrementListenedRequest{TrackUuid: trackUUID})
+	return err
+}

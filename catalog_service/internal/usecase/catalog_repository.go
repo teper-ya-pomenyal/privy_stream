@@ -10,6 +10,7 @@ import (
 type CatalogRepository interface {
 	GetTrackByID(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error)
 	AddTrack(ctx context.Context, track *domain.Track) error
+	IncrementListened(ctx context.Context, trackUUID uuid.UUID) error
 	TrackExists(ctx context.Context, trackUUID uuid.UUID) (bool, error)
 	SearchTrack(ctx context.Context, trackName string, limit, offset int) ([]domain.Track, error)
 	SearchArtist(ctx context.Context, artistName string, limit, offset int) ([]domain.Artist, error)

@@ -425,10 +425,11 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CatalogWriteService_AddArtist_FullMethodName        = "/catalog.v1.CatalogWriteService/AddArtist"
-	CatalogWriteService_AddAlbum_FullMethodName         = "/catalog.v1.CatalogWriteService/AddAlbum"
-	CatalogWriteService_AddTrack_FullMethodName         = "/catalog.v1.CatalogWriteService/AddTrack"
-	CatalogWriteService_AddTracksToAlbum_FullMethodName = "/catalog.v1.CatalogWriteService/AddTracksToAlbum"
+	CatalogWriteService_AddArtist_FullMethodName         = "/catalog.v1.CatalogWriteService/AddArtist"
+	CatalogWriteService_AddAlbum_FullMethodName          = "/catalog.v1.CatalogWriteService/AddAlbum"
+	CatalogWriteService_AddTrack_FullMethodName          = "/catalog.v1.CatalogWriteService/AddTrack"
+	CatalogWriteService_AddTracksToAlbum_FullMethodName  = "/catalog.v1.CatalogWriteService/AddTracksToAlbum"
+	CatalogWriteService_IncrementListened_FullMethodName = "/catalog.v1.CatalogWriteService/IncrementListened"
 )
 
 // CatalogWriteServiceClient is the client API for CatalogWriteService service.
@@ -442,6 +443,7 @@ type CatalogWriteServiceClient interface {
 	AddAlbum(ctx context.Context, in *AddAlbumRequest, opts ...grpc.CallOption) (*AddAlbumResponse, error)
 	AddTrack(ctx context.Context, in *AddTrackRequest, opts ...grpc.CallOption) (*AddTrackResponse, error)
 	AddTracksToAlbum(ctx context.Context, in *AddTracksToAlbumRequest, opts ...grpc.CallOption) (*AddTracksToAlbumResponse, error)
+	IncrementListened(ctx context.Context, in *IncrementListenedRequest, opts ...grpc.CallOption) (*IncrementListenedResponse, error)
 }
 
 type catalogWriteServiceClient struct {
@@ -492,6 +494,16 @@ func (c *catalogWriteServiceClient) AddTracksToAlbum(ctx context.Context, in *Ad
 	return out, nil
 }
 
+func (c *catalogWriteServiceClient) IncrementListened(ctx context.Context, in *IncrementListenedRequest, opts ...grpc.CallOption) (*IncrementListenedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IncrementListenedResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_IncrementListened_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogWriteServiceServer is the server API for CatalogWriteService service.
 // All implementations must embed UnimplementedCatalogWriteServiceServer
 // for forward compatibility.
@@ -503,6 +515,7 @@ type CatalogWriteServiceServer interface {
 	AddAlbum(context.Context, *AddAlbumRequest) (*AddAlbumResponse, error)
 	AddTrack(context.Context, *AddTrackRequest) (*AddTrackResponse, error)
 	AddTracksToAlbum(context.Context, *AddTracksToAlbumRequest) (*AddTracksToAlbumResponse, error)
+	IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error)
 	mustEmbedUnimplementedCatalogWriteServiceServer()
 }
 
@@ -524,6 +537,9 @@ func (UnimplementedCatalogWriteServiceServer) AddTrack(context.Context, *AddTrac
 }
 func (UnimplementedCatalogWriteServiceServer) AddTracksToAlbum(context.Context, *AddTracksToAlbumRequest) (*AddTracksToAlbumResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AddTracksToAlbum not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method IncrementListened not implemented")
 }
 func (UnimplementedCatalogWriteServiceServer) mustEmbedUnimplementedCatalogWriteServiceServer() {}
 func (UnimplementedCatalogWriteServiceServer) testEmbeddedByValue()                             {}
@@ -618,6 +634,24 @@ func _CatalogWriteService_AddTracksToAlbum_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogWriteService_IncrementListened_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IncrementListenedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).IncrementListened(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_IncrementListened_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).IncrementListened(ctx, req.(*IncrementListenedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogWriteService_ServiceDesc is the grpc.ServiceDesc for CatalogWriteService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -640,6 +674,10 @@ var CatalogWriteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddTracksToAlbum",
 			Handler:    _CatalogWriteService_AddTracksToAlbum_Handler,
+		},
+		{
+			MethodName: "IncrementListened",
+			Handler:    _CatalogWriteService_IncrementListened_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

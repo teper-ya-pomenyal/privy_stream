@@ -1909,6 +1909,86 @@ func (*AddTracksToAlbumResponse) Descriptor() ([]byte, []int) {
 	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{34}
 }
 
+type IncrementListenedRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TrackUuid     string                 `protobuf:"bytes,1,opt,name=track_uuid,json=trackUuid,proto3" json:"track_uuid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IncrementListenedRequest) Reset() {
+	*x = IncrementListenedRequest{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IncrementListenedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IncrementListenedRequest) ProtoMessage() {}
+
+func (x *IncrementListenedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IncrementListenedRequest.ProtoReflect.Descriptor instead.
+func (*IncrementListenedRequest) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *IncrementListenedRequest) GetTrackUuid() string {
+	if x != nil {
+		return x.TrackUuid
+	}
+	return ""
+}
+
+type IncrementListenedResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IncrementListenedResponse) Reset() {
+	*x = IncrementListenedResponse{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IncrementListenedResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IncrementListenedResponse) ProtoMessage() {}
+
+func (x *IncrementListenedResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IncrementListenedResponse.ProtoReflect.Descriptor instead.
+func (*IncrementListenedResponse) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{36}
+}
+
 var File_proto_catalog_v1_catalog_proto protoreflect.FileDescriptor
 
 const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
@@ -2075,7 +2155,11 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"album_uuid\x18\x01 \x01(\tR\talbumUuid\x123\n" +
 	"\x06tracks\x18\x02 \x03(\v2\x1b.catalog.v1.AlbumTrackInputR\x06tracks\"\x1a\n" +
-	"\x18AddTracksToAlbumResponse2\x90\x06\n" +
+	"\x18AddTracksToAlbumResponse\"9\n" +
+	"\x18IncrementListenedRequest\x12\x1d\n" +
+	"\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\x1b\n" +
+	"\x19IncrementListenedResponse2\x90\x06\n" +
 	"\x0eCatalogService\x12Q\n" +
 	"\fGetTrackByID\x12\x1f.catalog.v1.GetTrackByIDRequest\x1a .catalog.v1.GetTrackByIDResponse\x12N\n" +
 	"\vTrackExists\x12\x1e.catalog.v1.TrackExistsRequest\x1a\x1f.catalog.v1.TrackExistsResponse\x12N\n" +
@@ -2085,12 +2169,13 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x0fGetArtistAlbums\x12\".catalog.v1.GetArtistAlbumsRequest\x1a#.catalog.v1.GetArtistAlbumsResponse\x12Z\n" +
 	"\x0fGetArtistTracks\x12\".catalog.v1.GetArtistTracksRequest\x1a#.catalog.v1.GetArtistTracksResponse\x12Q\n" +
 	"\fGetAlbumByID\x12\x1f.catalog.v1.GetAlbumByIDRequest\x1a .catalog.v1.GetAlbumByIDResponse\x12W\n" +
-	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xcc\x02\n" +
+	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xae\x03\n" +
 	"\x13CatalogWriteService\x12H\n" +
 	"\tAddArtist\x12\x1c.catalog.v1.AddArtistRequest\x1a\x1d.catalog.v1.AddArtistResponse\x12E\n" +
 	"\bAddAlbum\x12\x1b.catalog.v1.AddAlbumRequest\x1a\x1c.catalog.v1.AddAlbumResponse\x12E\n" +
 	"\bAddTrack\x12\x1b.catalog.v1.AddTrackRequest\x1a\x1c.catalog.v1.AddTrackResponse\x12]\n" +
-	"\x10AddTracksToAlbum\x12#.catalog.v1.AddTracksToAlbumRequest\x1a$.catalog.v1.AddTracksToAlbumResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
+	"\x10AddTracksToAlbum\x12#.catalog.v1.AddTracksToAlbumRequest\x1a$.catalog.v1.AddTracksToAlbumResponse\x12`\n" +
+	"\x11IncrementListened\x12$.catalog.v1.IncrementListenedRequest\x1a%.catalog.v1.IncrementListenedResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
 
 var (
 	file_proto_catalog_v1_catalog_proto_rawDescOnce sync.Once
@@ -2104,43 +2189,45 @@ func file_proto_catalog_v1_catalog_proto_rawDescGZIP() []byte {
 	return file_proto_catalog_v1_catalog_proto_rawDescData
 }
 
-var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_proto_catalog_v1_catalog_proto_goTypes = []any{
-	(*Track)(nil),                    // 0: catalog.v1.Track
-	(*LightTrack)(nil),               // 1: catalog.v1.LightTrack
-	(*Artist)(nil),                   // 2: catalog.v1.Artist
-	(*Album)(nil),                    // 3: catalog.v1.Album
-	(*LightAlbum)(nil),               // 4: catalog.v1.LightAlbum
-	(*Playlist)(nil),                 // 5: catalog.v1.Playlist
-	(*GetArtistTracksRequest)(nil),   // 6: catalog.v1.GetArtistTracksRequest
-	(*GetArtistTracksResponse)(nil),  // 7: catalog.v1.GetArtistTracksResponse
-	(*GetAlbumTracksRequest)(nil),    // 8: catalog.v1.GetAlbumTracksRequest
-	(*GetAlbumTracksResponse)(nil),   // 9: catalog.v1.GetAlbumTracksResponse
-	(*GetArtistAlbumsRequest)(nil),   // 10: catalog.v1.GetArtistAlbumsRequest
-	(*GetArtistAlbumsResponse)(nil),  // 11: catalog.v1.GetArtistAlbumsResponse
-	(*GetTrackByIDRequest)(nil),      // 12: catalog.v1.GetTrackByIDRequest
-	(*GetTrackByIDResponse)(nil),     // 13: catalog.v1.GetTrackByIDResponse
-	(*TrackExistsRequest)(nil),       // 14: catalog.v1.TrackExistsRequest
-	(*TrackExistsResponse)(nil),      // 15: catalog.v1.TrackExistsResponse
-	(*SearchTrackResponse)(nil),      // 16: catalog.v1.SearchTrackResponse
-	(*SearchTrackRequest)(nil),       // 17: catalog.v1.SearchTrackRequest
-	(*SearchArtistRequest)(nil),      // 18: catalog.v1.SearchArtistRequest
-	(*SearchArtistResponse)(nil),     // 19: catalog.v1.SearchArtistResponse
-	(*GetPlaylistByIDRequest)(nil),   // 20: catalog.v1.GetPlaylistByIDRequest
-	(*GetPlaylistByIDResponse)(nil),  // 21: catalog.v1.GetPlaylistByIDResponse
-	(*GetArtistByIDRequest)(nil),     // 22: catalog.v1.GetArtistByIDRequest
-	(*GetArtistByIDResponse)(nil),    // 23: catalog.v1.GetArtistByIDResponse
-	(*GetAlbumByIDRequest)(nil),      // 24: catalog.v1.GetAlbumByIDRequest
-	(*GetAlbumByIDResponse)(nil),     // 25: catalog.v1.GetAlbumByIDResponse
-	(*AddArtistRequest)(nil),         // 26: catalog.v1.AddArtistRequest
-	(*AddArtistResponse)(nil),        // 27: catalog.v1.AddArtistResponse
-	(*AddAlbumRequest)(nil),          // 28: catalog.v1.AddAlbumRequest
-	(*AddAlbumResponse)(nil),         // 29: catalog.v1.AddAlbumResponse
-	(*AddTrackRequest)(nil),          // 30: catalog.v1.AddTrackRequest
-	(*AddTrackResponse)(nil),         // 31: catalog.v1.AddTrackResponse
-	(*AlbumTrackInput)(nil),          // 32: catalog.v1.AlbumTrackInput
-	(*AddTracksToAlbumRequest)(nil),  // 33: catalog.v1.AddTracksToAlbumRequest
-	(*AddTracksToAlbumResponse)(nil), // 34: catalog.v1.AddTracksToAlbumResponse
+	(*Track)(nil),                     // 0: catalog.v1.Track
+	(*LightTrack)(nil),                // 1: catalog.v1.LightTrack
+	(*Artist)(nil),                    // 2: catalog.v1.Artist
+	(*Album)(nil),                     // 3: catalog.v1.Album
+	(*LightAlbum)(nil),                // 4: catalog.v1.LightAlbum
+	(*Playlist)(nil),                  // 5: catalog.v1.Playlist
+	(*GetArtistTracksRequest)(nil),    // 6: catalog.v1.GetArtistTracksRequest
+	(*GetArtistTracksResponse)(nil),   // 7: catalog.v1.GetArtistTracksResponse
+	(*GetAlbumTracksRequest)(nil),     // 8: catalog.v1.GetAlbumTracksRequest
+	(*GetAlbumTracksResponse)(nil),    // 9: catalog.v1.GetAlbumTracksResponse
+	(*GetArtistAlbumsRequest)(nil),    // 10: catalog.v1.GetArtistAlbumsRequest
+	(*GetArtistAlbumsResponse)(nil),   // 11: catalog.v1.GetArtistAlbumsResponse
+	(*GetTrackByIDRequest)(nil),       // 12: catalog.v1.GetTrackByIDRequest
+	(*GetTrackByIDResponse)(nil),      // 13: catalog.v1.GetTrackByIDResponse
+	(*TrackExistsRequest)(nil),        // 14: catalog.v1.TrackExistsRequest
+	(*TrackExistsResponse)(nil),       // 15: catalog.v1.TrackExistsResponse
+	(*SearchTrackResponse)(nil),       // 16: catalog.v1.SearchTrackResponse
+	(*SearchTrackRequest)(nil),        // 17: catalog.v1.SearchTrackRequest
+	(*SearchArtistRequest)(nil),       // 18: catalog.v1.SearchArtistRequest
+	(*SearchArtistResponse)(nil),      // 19: catalog.v1.SearchArtistResponse
+	(*GetPlaylistByIDRequest)(nil),    // 20: catalog.v1.GetPlaylistByIDRequest
+	(*GetPlaylistByIDResponse)(nil),   // 21: catalog.v1.GetPlaylistByIDResponse
+	(*GetArtistByIDRequest)(nil),      // 22: catalog.v1.GetArtistByIDRequest
+	(*GetArtistByIDResponse)(nil),     // 23: catalog.v1.GetArtistByIDResponse
+	(*GetAlbumByIDRequest)(nil),       // 24: catalog.v1.GetAlbumByIDRequest
+	(*GetAlbumByIDResponse)(nil),      // 25: catalog.v1.GetAlbumByIDResponse
+	(*AddArtistRequest)(nil),          // 26: catalog.v1.AddArtistRequest
+	(*AddArtistResponse)(nil),         // 27: catalog.v1.AddArtistResponse
+	(*AddAlbumRequest)(nil),           // 28: catalog.v1.AddAlbumRequest
+	(*AddAlbumResponse)(nil),          // 29: catalog.v1.AddAlbumResponse
+	(*AddTrackRequest)(nil),           // 30: catalog.v1.AddTrackRequest
+	(*AddTrackResponse)(nil),          // 31: catalog.v1.AddTrackResponse
+	(*AlbumTrackInput)(nil),           // 32: catalog.v1.AlbumTrackInput
+	(*AddTracksToAlbumRequest)(nil),   // 33: catalog.v1.AddTracksToAlbumRequest
+	(*AddTracksToAlbumResponse)(nil),  // 34: catalog.v1.AddTracksToAlbumResponse
+	(*IncrementListenedRequest)(nil),  // 35: catalog.v1.IncrementListenedRequest
+	(*IncrementListenedResponse)(nil), // 36: catalog.v1.IncrementListenedResponse
 }
 var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	0,  // 0: catalog.v1.Playlist.tracks:type_name -> catalog.v1.Track
@@ -2168,21 +2255,23 @@ var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	28, // 22: catalog.v1.CatalogWriteService.AddAlbum:input_type -> catalog.v1.AddAlbumRequest
 	30, // 23: catalog.v1.CatalogWriteService.AddTrack:input_type -> catalog.v1.AddTrackRequest
 	33, // 24: catalog.v1.CatalogWriteService.AddTracksToAlbum:input_type -> catalog.v1.AddTracksToAlbumRequest
-	13, // 25: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
-	15, // 26: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
-	16, // 27: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
-	23, // 28: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
-	19, // 29: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
-	11, // 30: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
-	7,  // 31: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
-	25, // 32: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
-	9,  // 33: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
-	27, // 34: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
-	29, // 35: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
-	31, // 36: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
-	34, // 37: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
-	25, // [25:38] is the sub-list for method output_type
-	12, // [12:25] is the sub-list for method input_type
+	35, // 25: catalog.v1.CatalogWriteService.IncrementListened:input_type -> catalog.v1.IncrementListenedRequest
+	13, // 26: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
+	15, // 27: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
+	16, // 28: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
+	23, // 29: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
+	19, // 30: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
+	11, // 31: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
+	7,  // 32: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
+	25, // 33: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
+	9,  // 34: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
+	27, // 35: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
+	29, // 36: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
+	31, // 37: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
+	34, // 38: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
+	36, // 39: catalog.v1.CatalogWriteService.IncrementListened:output_type -> catalog.v1.IncrementListenedResponse
+	26, // [26:40] is the sub-list for method output_type
+	12, // [12:26] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -2199,7 +2288,7 @@ func file_proto_catalog_v1_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_catalog_v1_catalog_proto_rawDesc), len(file_proto_catalog_v1_catalog_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   35,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

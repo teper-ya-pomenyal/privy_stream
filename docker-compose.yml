@@ -114,6 +114,7 @@ services:
     environment:
       STREAMING_SERVICE_PORT: ${STREAMING_SERVICE_PORT:-50054}
       CATALOG_SERVICE_ADDRESS: catalog_service:${CATALOG_SERVICE_PORT:-50053}
+      CATALOG_WRITE_SERVICE_ADDRESS: catalog_service:${CATALOG_WRITE_SERVICE_PORT:-50056}
       TRACK_STORAGE_PATH: /data/tracks
     build:
       context: .

@@ -6,9 +6,10 @@ import (
 )
 
 type Config struct {
-	TrackStoragePath      string
-	CatalogServiceAddress string
-	Port                  string
+	TrackStoragePath           string
+	CatalogServiceAddress      string
+	CatalogWriteServiceAddress string
+	Port                       string
 }
 
 func NewConfig() *Config {
@@ -21,13 +22,18 @@ func NewConfig() *Config {
 	if tsp == "" {
 		log.Fatal("environment variable missing: CATALOG_SERVICE_ADDRESS")
 	}
+	cwsa := os.Getenv("CATALOG_WRITE_SERVICE_ADDRESS")
+	if cwsa == "" {
+		log.Fatal("environment variable missing: CATALOG_WRITE_SERVICE_ADDRESS")
+	}
 	port := os.Getenv("STREAMING_SERVICE_PORT")
 	if tsp == "" {
 		log.Fatal("environment variable missing: STREAMING_SERVICE_PORT")
 	}
 	return &Config{
-		TrackStoragePath:      tsp,
-		CatalogServiceAddress: csa,
-		Port:                  port,
+		TrackStoragePath:           tsp,
+		CatalogServiceAddress:      csa,
+		CatalogWriteServiceAddress: cwsa,
+		Port:                       port,
 	}
 }

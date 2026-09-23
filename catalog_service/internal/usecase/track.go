@@ -68,3 +68,7 @@ func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUI
 	}
 	return track, nil
 }
+
+func (t *TrackUseCase) IncrementListened(ctx context.Context, trackUUID uuid.UUID) error {
+	return t.repo.IncrementListened(ctx, trackUUID)
+}

@@ -26,7 +26,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	catalog := client.NewCatalogClient(conn)
+	writeConn, err := grpc.NewClient(cfg.CatalogWriteServiceAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer writeConn.Close()
+	catalog := client.NewCatalogClient(conn, writeConn)
 
 	handlers := delivery.NewHTTPHandler(streamer, catalog)
 

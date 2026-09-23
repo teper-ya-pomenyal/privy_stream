@@ -25,6 +25,7 @@ service CatalogWriteService {
     rpc AddAlbum(AddAlbumRequest) returns (AddAlbumResponse);
     rpc AddTrack(AddTrackRequest) returns (AddTrackResponse);
     rpc AddTracksToAlbum(AddTracksToAlbumRequest) returns (AddTracksToAlbumResponse);
+    rpc IncrementListened(IncrementListenedRequest) returns (IncrementListenedResponse);
 }
 
 // структуры для клиента
@@ -255,3 +256,9 @@ message AddTracksToAlbumRequest {
 }
 
 message AddTracksToAlbumResponse {}
+
+message IncrementListenedRequest {
+    string track_uuid = 1;
+}
+
+message IncrementListenedResponse {}
