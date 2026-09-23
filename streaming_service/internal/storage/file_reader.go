@@ -30,6 +30,10 @@ func ReadFile(filePath string) (*FileReaderResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	if fi.IsDir() {
+		file.Close()
+		return nil, domain.ErrFileNotExists
+	}
 	md := fi.ModTime()
 	res := &FileReaderResponse{File: file, ModTime: md}
 	return res, nil

@@ -240,6 +240,10 @@ func (h *CatalogHandler) AddTrackFile(w http.ResponseWriter, r *http.Request) {
 		mapGRPCError(w, err)
 		return
 	}
+	if track.Path == "" {
+		http.Error(w, "track has no path set", http.StatusBadRequest)
+		return
+	}
 
 	if err := r.ParseMultipartForm(maxTrackFileMemory); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
