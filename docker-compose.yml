@@ -21,6 +21,7 @@ services:
       - jwt_public:/public
 
   postgres-users:
+    restart: unless-stopped
     image: postgres:16
     environment:
       POSTGRES_DB: ${POSTGRES_DB_USERS}
@@ -47,6 +48,7 @@ services:
         condition: service_healthy
 
   postgres-catalog:
+    restart: unless-stopped
     image:
       postgres:16
     environment:
@@ -74,12 +76,14 @@ services:
         condition: service_healthy
 
   redis_catalog_cache:
+    restart: unless-stopped
     image: redis:7
     command: redis-server --appendonly yes
     volumes:
       - redis_catalog_cache_data:/data
 
   redis_users_sessions:
+    restart: unless-stopped
     image: redis:7
     command: redis-server --appendonly yes --requirepass ${USER_CACHE_PASSWORD}
 
@@ -87,6 +91,7 @@ services:
       - redis_users_sessions_data:/data
 
   catalog_service:
+    restart: unless-stopped
     environment:
       CATALOG_SERVICE_PORT: ${CATALOG_SERVICE_PORT:-50053}
       CATALOG_WRITE_SERVICE_PORT: ${CATALOG_WRITE_SERVICE_PORT:-50056}
@@ -103,6 +108,7 @@ services:
         condition: service_completed_successfully
 
   gateway:
+    restart: unless-stopped
     environment:
       PORT: "8080"
       USER_SERVICE_ADDRESS: user_service:${PORT}
@@ -129,6 +135,7 @@ services:
         condition: service_started
 
   streaming_service:
+    restart: unless-stopped
     environment:
       STREAMING_SERVICE_PORT: ${STREAMING_SERVICE_PORT:-50054}
       CATALOG_SERVICE_ADDRESS: catalog_service:${CATALOG_SERVICE_PORT:-50053}
@@ -143,6 +150,7 @@ services:
       - catalog_service
 
   user_service:
+    restart: unless-stopped
     environment:
       PORT: ${PORT}
       DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-users:5432/${POSTGRES_DB_USERS}?sslmode=disable"
