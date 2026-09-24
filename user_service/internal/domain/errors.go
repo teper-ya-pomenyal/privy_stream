@@ -18,4 +18,7 @@ var (
 	ErrLoginTooShort             = errors.New("login is too short")
 	ErrLoginTooLong              = errors.New("login is too long")
 	ErrInvalidRefreshToken       = errors.New("invalid refresh token")
+	ErrLoginRequired             = errors.New("login is required")
+	ErrPasswordRequired          = errors.New("password is required")
+	ErrBirthDateRequired         = errors.New("birth date is required")
 )

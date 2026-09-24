@@ -25,7 +25,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Invalid request data
+          description: |
+            Ошибка валидации конкретного поля. Коды (`code`):
+            - user_name: `login_required`, `login_too_short` (< 3), `login_too_long` (> 20),
+              `login_invalid_characters` (разрешены a-z, A-Z, 0-9, `.`, `_`, `-`, без двух спецсимволов подряд)
+            - password: `password_required`, `password_too_short` (< 11), `password_too_long` (> 128),
+              `password_missing_special` (нужен хотя бы один спецсимвол)
+            - birth_date: `birth_date_required`, `birth_date_invalid_format` (не YYYY-MM-DD),
+              `birth_date_out_of_range` (раньше 1900-01-01 или в будущем)
+
+            Невалидный JSON тела запроса — text/plain `invalid request body`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
         '409':
           description: A user with this name already exists
 
@@ -535,6 +548,26 @@ components:
         format: uuid
 
   schemas:
+    ValidationError:
+      type: object
+      required:
+        - code
+        - field
+        - message
+      properties:
+        code:
+          type: string
+          description: Машиночитаемый код ошибки, по нему клиент выбирает текст
+          example: password_too_short
+        field:
+          type: string
+          enum: [user_name, password, birth_date]
+          example: password
+        message:
+          type: string
+          description: Техническое описание на английском
+          example: password is too short
+
     RegisterRequest:
       type: object
       required:

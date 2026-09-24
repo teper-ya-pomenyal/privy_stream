@@ -59,14 +59,23 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.BirthDate == "" || req.Password == "" || req.UserName == "" {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+	// required fields
+	if req.UserName == "" {
+		writeValidationError(w, "user_name", "login_required", "login is required")
+		return
+	}
+	if req.Password == "" {
+		writeValidationError(w, "password", "password_required", "password is required")
+		return
+	}
+	if req.BirthDate == "" {
+		writeValidationError(w, "birth_date", "birth_date_required", "birth date is required")
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", req.BirthDate)
 	if err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+		writeValidationError(w, "birth_date", "birth_date_invalid_format", "birth date must be in YYYY-MM-DD format")
 		return
 	}
 	res, err := h.userClient.Register(r.Context(), req.UserName, req.Password, birthDate)

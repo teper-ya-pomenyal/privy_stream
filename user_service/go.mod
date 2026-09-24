@@ -10,6 +10,7 @@ require (
 	github.com/teper-ya-pomenyal/privy_stream/jwtmanager v0.0.0-20260830100439-1ca989f99171
 	github.com/teper-ya-pomenyal/privy_stream/proto v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.56.0
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.11
 )
@@ -30,5 +31,4 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 )
