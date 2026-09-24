@@ -1,4 +1,4 @@
 ALTER TABLE tracks
-    DROP COLUMN path,
-    DROP COLUMN duration_ms,
-    DROP COLUMN listened;
+    DROP COLUMN IF EXISTS path,
+    DROP COLUMN IF EXISTS duration_ms,
+    DROP COLUMN IF EXISTS listened;
