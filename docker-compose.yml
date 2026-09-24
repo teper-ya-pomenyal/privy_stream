@@ -1,5 +1,25 @@
 
 services:
+  # Пара RSA-ключей для JWT: генерируется при первом запуске, дальше переиспользуется.
+  # Ротация: docker compose down && docker volume rm privy_stream_jwt_private privy_stream_jwt_public
+  jwt_keys_init:
+    image: alpine/openssl
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        if [ -s /private/private.pem ] && [ -s /public/public.pem ]; then
+          echo "jwt keys: already exist"; exit 0
+        fi
+        openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /private/private.pem
+        openssl rsa -in /private/private.pem -pubout -out /public/public.pem
+        chmod 600 /private/private.pem
+        chmod 644 /public/public.pem
+        echo "jwt keys: generated"
+    volumes:
+      - jwt_private:/private
+      - jwt_public:/public
+
   postgres-users:
     image: postgres:16
     environment:
@@ -98,11 +118,15 @@ services:
       context: .
       dockerfile: gateway/Dockerfile
     volumes:
-      - ./gateway/keys:/keys
+      - jwt_public:/keys:ro
       - tracks_storage:/data/tracks
     depends_on:
-      - user_service
-      - catalog_service
+      jwt_keys_init:
+        condition: service_completed_successfully
+      user_service:
+        condition: service_started
+      catalog_service:
+        condition: service_started
 
   streaming_service:
     environment:
@@ -132,13 +156,15 @@ services:
       USER_CACHE_WRITE_TIMEOUT: ${USER_CACHE_DIAL_TIMEOUT}
       TTL_REFRESH_TIME: ${TTL_REFRESH_TIME}
       TTL_ACCESS_TIME: ${TTL_ACCESS_TIME}
-      PRIVATE_KEY_PATH: ${PRIVATE_KEY_PATH}
+      PRIVATE_KEY_PATH: ${PRIVATE_KEY_PATH:-/keys/private.pem}
     build:
       context: .
       dockerfile: user_service/Dockerfile
     volumes:
-      - ./user_service/keys:/app/keys
+      - jwt_private:/keys:ro
     depends_on:
+      jwt_keys_init:
+        condition: service_completed_successfully
       postgres-users:
         condition: service_healthy
       redis_users_sessions:
@@ -147,6 +173,8 @@ services:
         condition: service_completed_successfully
 
 volumes:
+  jwt_private:
+  jwt_public:
   tracks_storage:
   postgres_users_data:
   postgres_catalog_data:

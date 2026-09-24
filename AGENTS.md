@@ -35,11 +35,12 @@
   - internal/handlers - HTTP-хендлеры (chi)
   - internal/clients - gRPC-клиенты к user_service/catalog_service
   - internal/middlewares - recovery/logging/CORS/auth/rate-limit
-  - keys/public.pem - публичный ключ для верификации JWT (через jwtmanager)
+  - /keys/public.pem (том jwt_public) - публичный ключ для верификации JWT (через jwtmanager)
 
 - user_service/ регистрация/логин, выдача JWT
   - internal/delivery, domain, repository, usecase, utils - чистая архитектура
-  - keys/private.pem - приватный ключ для подписи JWT (через jwtmanager)
+  - /keys/private.pem (том jwt_private) - приватный ключ для подписи JWT (через jwtmanager);
+    пару генерирует сервис jwt_keys_init в docker-compose при первом запуске
 
 - catalog_service/ - каталог: треки/артисты/альбомы/плейлисты
   - internal/delivery, domain, repository, usecase, utils

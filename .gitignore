@@ -72,3 +72,6 @@ postman
 
 # Рабочие заметки/планы, не для коммита
 ADMIN_BACKEND_PLAN.md
+
+# JWT-ключи генерируются в docker-томах (jwt_keys_init)
+*.pem
