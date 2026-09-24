@@ -7,10 +7,10 @@ import (
 	mw "github.com/teper-ya-pomenyal/privy_stream/gateway/internal/middlewares"
 )
 
-func (h *UserHandler) NewRouter(m *mw.MiddleWares) *chi.Mux {
+func (h *UserHandler) NewRouter(m *mw.MiddleWares, allowedOrigins []string) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: allowedOrigins,
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 	}))

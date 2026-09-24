@@ -3,7 +3,11 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 )
+
+// desktop client (Tauri) sends requests from its webview origin
+var tauriOrigins = []string{"tauri://localhost", "http://tauri.localhost", "https://tauri.localhost"}
 
 type Config struct {
 	UserServiceAddress         string
@@ -13,6 +17,7 @@ type Config struct {
 	PubKeyAddress              string
 	TrackStoragePath           string
 	Port                       string
+	CORSAllowedOrigins         []string
 }
 
 func LoadConfig() *Config {
@@ -46,6 +51,18 @@ func LoadConfig() *Config {
 		port = "8080"
 	}
 
+	// web client origins, comma-separated
+	var corsOrigins []string
+	for _, o := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
+		if o = strings.TrimSpace(o); o != "" {
+			corsOrigins = append(corsOrigins, o)
+		}
+	}
+	if len(corsOrigins) == 0 {
+		log.Print("CORS_ALLOWED_ORIGINS is empty: only the desktop client is allowed")
+	}
+	corsOrigins = append(corsOrigins, tauriOrigins...)
+
 	return &Config{
 		UserServiceAddress:         usAddress,
 		CatalogServiceAddress:      catalogAddress,
@@ -54,5 +71,6 @@ func LoadConfig() *Config {
 		PubKeyAddress:              pka,
 		TrackStoragePath:           trackStoragePath,
 		Port:                       port,
+		CORSAllowedOrigins:         corsOrigins,
 	}
 }

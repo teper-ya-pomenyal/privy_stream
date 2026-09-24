@@ -69,3 +69,6 @@ postman
 .postman
 .claude
 .zed
+
+# Рабочие заметки/планы, не для коммита
+ADMIN_BACKEND_PLAN.md

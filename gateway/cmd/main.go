@@ -42,7 +42,7 @@ func main() {
 	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage)
 	streamingRouter := handlers.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
 
-	router := userHandler.NewRouter(mw)
+	router := userHandler.NewRouter(mw, cfg.CORSAllowedOrigins)
 	catalogHandler.MountRoutes(router, mw)
 	router.Mount("/", streamingRouter)
 

@@ -6,8 +6,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_USERS}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_users_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,8 +33,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_CATALOG:-catalog_db}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5434:5432"
     volumes:
       - postgres_catalog_data:/var/lib/postgresql/data
     healthcheck:
@@ -60,16 +56,13 @@ services:
   redis_catalog_cache:
     image: redis:7
     command: redis-server --appendonly yes
-    ports:
-      - "5435:6379"
     volumes:
       - redis_catalog_cache_data:/data
 
   redis_users_sessions:
     image: redis:7
     command: redis-server --appendonly yes --requirepass ${USER_CACHE_PASSWORD}
-    ports:
-      - "5436:6379"
+
     volumes:
       - redis_users_sessions_data:/data
 
@@ -98,6 +91,7 @@ services:
       STREAMING_SERVICE_ADDRESS: streaming_service:${STREAMING_SERVICE_PORT:-50054}
       PUBLIC_KEY_ADDRESS: /keys/public.pem
       TRACK_STORAGE_PATH: /data/tracks
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:1420}
     ports:
     - "8080:8080"
     build:
