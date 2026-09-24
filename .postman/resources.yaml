@@ -1,9 +1,0 @@
-# Use this workspace to collaborate
-workspace:
-  id: eb8eaee0-0b00-4b80-8dee-fcffaeccc6a3
-
-localResources:
-  specs:
-    - ../api/v1/openapi.yaml
-    - ../proto/user/v1/user.proto
-    - ../proto/catalog/v1/catalog.proto
