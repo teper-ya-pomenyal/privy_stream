@@ -15,7 +15,7 @@ var (
 
 func ValidatePassword(password string) error {
 	runesPassword := []rune(password)
-	if len(runesPassword) < 11 {
+	if len(runesPassword) < 8 {
 		return domain.ErrPasswordTooShort
 	}
 	if len(runesPassword) > 128 {
