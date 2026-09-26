@@ -75,4 +75,6 @@ func main() {
 	case <-time.After(10 * time.Second):
 		log.Println("gRPC сервер остановлен по таймауту")
 	}
+
+	repo.Close()
 }

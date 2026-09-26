@@ -2,10 +2,10 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
@@ -13,25 +13,24 @@ import (
 func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
 	trackPath := &domain.TrackPath{}
 
-	err := c.conn.QueryRowContext(ctx, `
+	err := c.pool.QueryRow(ctx, `
 		SELECT path, duration_ms, explicit
 		FROM tracks
 		WHERE track_id = $1
 		`,
 		trackUUID,
 	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit)
-	switch err {
-	case sql.ErrNoRows:
-		return nil, domain.ErrTrackNotFound
-	case nil:
-		return trackPath, nil
-	default:
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrTrackNotFound
+		}
 		return nil, err
 	}
+	return trackPath, nil
 }
 
 func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, limit, offset int) ([]domain.Track, error) {
-	rows, err := c.conn.QueryContext(ctx, `
+	rows, err := c.pool.Query(ctx, `
 		SELECT
 			t.track_id, t.track_name, t.artist_id, ar.artist_name,
 		 	t.album_id, al.album_name, t.explicit, t.created_at, t.duration_ms
@@ -69,28 +68,22 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 }
 
 func (c *PostgresCatalog) TrackExists(ctx context.Context, trackUUID uuid.UUID) (bool, error) {
-	var id uuid.UUID
-	err := c.conn.QueryRowContext(ctx, `
-		SELECT track_id
-		FROM tracks
-		WHERE track_id = $1
+	var exists bool
+	err := c.pool.QueryRow(ctx, `
+		SELECT EXISTS(SELECT 1 FROM tracks WHERE track_id = $1)
 		`,
 		trackUUID,
-	).Scan(&id)
-	switch err {
-	case sql.ErrNoRows:
-		return false, nil
-	case nil:
-		return true, nil
-	default:
+	).Scan(&exists)
+	if err != nil {
 		return false, err
 	}
+	return exists, nil
 }
 
 //////////////////////////////////////////////////////
 
 func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
-	_, err := c.conn.ExecContext(ctx,
+	_, err := c.pool.Exec(ctx,
 		`INSERT INTO tracks
 			(track_id, track_name, artist_id, album_id,
 			explicit, created_at, path, duration_ms)
@@ -109,7 +102,7 @@ func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) err
 }
 
 func (c *PostgresCatalog) IncrementListened(ctx context.Context, trackUUID uuid.UUID) error {
-	res, err := c.conn.ExecContext(ctx, `
+	res, err := c.pool.Exec(ctx, `
 		UPDATE tracks
 		SET listened = COALESCE(listened, 0) + 1
 		WHERE track_id = $1
@@ -120,10 +113,8 @@ func (c *PostgresCatalog) IncrementListened(ctx context.Context, trackUUID uuid.
 		return err
 	}
 
-	n, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
+	n := res.RowsAffected()
+
 	if n == 0 {
 		return domain.ErrTrackNotFound
 	}

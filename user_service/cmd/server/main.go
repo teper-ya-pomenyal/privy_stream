@@ -21,21 +21,19 @@ import (
 
 func main() {
 
-	cacheDBConfig := config.NewUserDBCacheConfig()
 	cfg := config.LoadConfig()
-	userDBConfig := config.NewUserDBConfig()
 
-	userRepo, err := postgres.NewUsersPostgresRepository(userDBConfig)
+	userRepo, err := postgres.NewUsersPostgresRepository(cfg.UserDB)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userCache, err := redis.NewRedisSessionStore(cacheDBConfig, cfg.TTLRefresh)
+	userCache, err := redis.NewRedisSessionStore(cfg.UserCacheDB, cfg.TTLRefresh)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	privateKey, err := jwtmanager.LoadPrivateKey("keys/private.pem")
+	privateKey, err := jwtmanager.LoadPrivateKey(cfg.PrivateKeyPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,5 +79,7 @@ func main() {
 	case <-time.After(10 * time.Second):
 		log.Println("gRPC сервер остановлен по таймауту")
 	}
+
+	userRepo.Close()
 
 }

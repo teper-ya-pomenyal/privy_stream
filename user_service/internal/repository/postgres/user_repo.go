@@ -2,31 +2,52 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/config"
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/domain"
 )
 
 type UsersPostgresRepository struct {
-	conn *sqlx.DB
+	conn *pgxpool.Pool
 }
 
 func NewUsersPostgresRepository(cfg *config.UserDBConfig) (*UsersPostgresRepository, error) {
-	db, err := sqlx.Connect("pgx", cfg.DSN)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cfgDB, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
-	return &UsersPostgresRepository{conn: db}, nil
+	cfgDB.MaxConns = cfg.MaxConns
+	cfgDB.MinConns = cfg.MinConns
+	cfgDB.MaxConnLifetime = cfg.MaxConnLifetime
+	cfgDB.MaxConnIdleTime = cfg.MaxConnIdleTime
+	cfgDB.HealthCheckPeriod = cfg.HealthCheckPeriod
+	cfgDB.ConnConfig.ConnectTimeout = cfg.ConnectTimeout
+	conn, err := pgxpool.NewWithConfig(ctx, cfgDB)
+	if err != nil {
+		return nil, err
+	}
+	if err := conn.Ping(ctx); err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	return &UsersPostgresRepository{conn: conn}, nil
+}
+
+func (p *UsersPostgresRepository) Close() {
+	p.conn.Close()
 }
 
 func (p *UsersPostgresRepository) AddUser(ctx context.Context, user *domain.User) error {
-	_, err := p.conn.ExecContext(ctx,
+	_, err := p.conn.Exec(ctx,
 		"INSERT INTO users (uuid, user_name, password_hash, birth_date, created_at) VALUES($1, $2, $3, $4, $5)",
 		user.UserUUID, user.UserName, user.PasswordHash, user.BirthDate, user.CreatedAt,
 	)
@@ -42,45 +63,41 @@ func (p *UsersPostgresRepository) AddUser(ctx context.Context, user *domain.User
 }
 
 func (p *UsersPostgresRepository) GetUserByUserName(ctx context.Context, userName string) (*domain.User, error) {
-	user := &domain.User{}
-	err := p.conn.GetContext(ctx, user,
+	u := &domain.User{}
+	err := p.conn.QueryRow(ctx,
 		"SELECT uuid, user_name, password_hash, birth_date, created_at FROM users WHERE user_name = $1",
 		userName,
-	)
-	switch err {
-	case sql.ErrNoRows:
-		return nil, domain.ErrUserNotFound
-	case nil:
-		return user, nil
-	default:
+	).Scan(&u.UserUUID, &u.UserName, &u.PasswordHash, &u.BirthDate, &u.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
 		return nil, err
 	}
-
+	return u, nil
 }
 
 func (p *UsersPostgresRepository) GetUserByID(ctx context.Context, userUUID uuid.UUID) (*domain.User, error) {
-	user := &domain.User{}
-	err := p.conn.GetContext(ctx, user,
+	u := &domain.User{}
+	err := p.conn.QueryRow(ctx,
 		"SELECT uuid, user_name, password_hash, birth_date, created_at FROM users WHERE uuid = $1",
 		userUUID,
-	)
-	switch err {
-	case sql.ErrNoRows:
-		return nil, domain.ErrUserNotFound
-	case nil:
-		return user, nil
-	default:
+	).Scan(&u.UserUUID, &u.UserName, &u.PasswordHash, &u.BirthDate, &u.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
 		return nil, err
 	}
-
+	return u, nil
 }
 
 func (p *UsersPostgresRepository) UserAlreadyExists(ctx context.Context, userName string) (bool, error) {
 	var exists bool
-	err := p.conn.GetContext(ctx, &exists,
+	err := p.conn.QueryRow(ctx,
 		"SELECT EXISTS(SELECT 1 FROM users WHERE user_name = $1)",
 		userName,
-	)
+	).Scan(&exists)
 	if err != nil {
 		return false, err
 	}

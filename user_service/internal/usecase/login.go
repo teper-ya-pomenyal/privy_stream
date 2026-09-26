@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,6 +10,8 @@ import (
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/domain"
 	"github.com/teper-ya-pomenyal/privy_stream/user_service/internal/utils"
 )
+
+var dummyHash, _ = bcrypt.GenerateFromPassword([]byte("dummy-password"), 10)
 
 type LoginResult struct {
 	UUID         string
@@ -45,6 +48,10 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 
 	user, err := l.repo.GetUserByUserName(ctx, userName)
 	if err != nil {
+		if errors.Is(err, domain.ErrUserNotFound) {
+			_ = bcrypt.CompareHashAndPassword(dummyHash, []byte(password))
+			return nil, domain.ErrInvalidCredentials
+		}
 		return nil, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))

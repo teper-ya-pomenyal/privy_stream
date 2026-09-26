@@ -25,7 +25,7 @@ func (c *PostgresCatalog) AddTracksToAlbum(ctx context.Context, tracks []domain.
 		positions = append(positions, t.Position)
 	}
 
-	_, err := c.conn.ExecContext(ctx, `
+	_, err := c.pool.Exec(ctx, `
 		INSERT INTO albums_tracks (
 			album_id,
 			track_id,

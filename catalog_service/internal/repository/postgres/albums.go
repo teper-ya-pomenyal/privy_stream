@@ -2,40 +2,37 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
 func (c *PostgresCatalog) GetAlbumByID(ctx context.Context, albumUUID uuid.UUID) (*domain.Album, error) {
 	var album domain.Album
-	err := c.conn.QueryRowContext(ctx, `
+	err := c.pool.QueryRow(ctx, `
 		SELECT
 			album_id, artist_id, album_name, created_at
 		FROM albums
 		WHERE album_id = $1
 		`, albumUUID,
 	).Scan(&album.AlbumUUID, &album.ArtistUUID, &album.AlbumName, &album.CreatedAt)
-	switch err {
-	case sql.ErrNoRows:
-		return nil, domain.ErrAlbumNotFound
-	case nil:
-
-		return &album, err
-	default:
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrAlbumNotFound
+		}
 		return nil, err
 	}
-
+	return &album, nil
 }
 
 func (c *PostgresCatalog) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUID) ([]domain.LightAlbumTrack, error) {
 	// Трек принадлежит альбому либо через tracks.album_id (задаётся при AddTrack),
 	// либо через albums_tracks (AddTracksToAlbum, там же позиция в трек-листе).
 	// Учитываем оба источника: треки без позиции идут после пронумерованных.
-	rows, err := c.conn.QueryContext(ctx, `
+	rows, err := c.pool.Query(ctx, `
 		SELECT t.track_id, t.track_name, t.explicit, t.duration_ms, COALESCE(at.position, 0)
 		FROM tracks t
 		LEFT JOIN albums_tracks at ON at.track_id = t.track_id AND at.album_id = $1
@@ -66,7 +63,7 @@ func (c *PostgresCatalog) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUI
 ///////////////////////////////////////////////
 
 func (c *PostgresCatalog) AddAlbum(ctx context.Context, album *domain.Album) error {
-	_, err := c.conn.ExecContext(ctx, `
+	_, err := c.pool.Exec(ctx, `
 		INSERT INTO albums
 			(album_id, artist_id, album_name, created_at)
 		VALUES($1, $2, $3, $4)

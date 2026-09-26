@@ -2,16 +2,16 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/teper-ya-pomenyal/privy_stream/catalog_service/internal/domain"
 )
 
 func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, limit, offset int) ([]domain.Artist, error) {
-	rows, err := c.conn.QueryContext(ctx, `
+	rows, err := c.pool.Query(ctx, `
 		SELECT artist_id, artist_name
 		FROM artists
 		WHERE artist_name ILIKE '%' || $1 || '%'
@@ -40,7 +40,7 @@ func (c *PostgresCatalog) SearchArtist(ctx context.Context, artistName string, l
 }
 
 func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.UUID, limit, offset int32) ([]domain.Album, error) {
-	rows, err := c.conn.QueryContext(ctx, `
+	rows, err := c.pool.Query(ctx, `
 			SELECT album_id, album_name, created_at
 			FROM albums
 			WHERE artist_id = $1
@@ -70,7 +70,7 @@ func (c *PostgresCatalog) GetArtistAlbums(ctx context.Context, artistUUID uuid.U
 }
 
 func (c *PostgresCatalog) GetArtistTracks(ctx context.Context, artistUUID uuid.UUID, limit, offset int32) ([]domain.LightTrack, error) {
-	rows, err := c.conn.QueryContext(ctx, `
+	rows, err := c.pool.Query(ctx, `
 		SELECT track_id, track_name, explicit, duration_ms
 		FROM tracks
 		WHERE artist_id = $1
@@ -100,28 +100,26 @@ func (c *PostgresCatalog) GetArtistTracks(ctx context.Context, artistUUID uuid.U
 
 func (c *PostgresCatalog) GetArtistByID(ctx context.Context, artistUUID uuid.UUID) (*domain.Artist, error) {
 	var a domain.Artist
-	err := c.conn.QueryRowContext(ctx, `
+	err := c.pool.QueryRow(ctx, `
 		SELECT artist_id, artist_name
 		FROM artists
 		WHERE artist_id = $1
 		`,
 		artistUUID,
 	).Scan(&a.ArtistUUID, &a.ArtistName)
-	switch err {
-	case sql.ErrNoRows:
-		return nil, domain.ErrArtistNotFound
-	case nil:
-		return &a, err
-	default:
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrArtistNotFound
+		}
 		return nil, err
 	}
-
+	return &a, nil
 }
 
 /////////////////////////////////////////////////////////////////
 
 func (c *PostgresCatalog) AddArtist(ctx context.Context, artist domain.Artist) error {
-	_, err := c.conn.ExecContext(ctx, `
+	_, err := c.pool.Exec(ctx, `
 		INSERT INTO artists
 			(artist_id, artist_name, created_at)
 		VALUES($1, $2, $3)

@@ -15,8 +15,8 @@ type UserDBCacheConfig struct {
 }
 
 func NewUserDBCacheConfig() *UserDBCacheConfig {
-	address := mustGetEnv("USER_CACHE_ADDRESS")
-	password := mustGetEnv("USER_CACHE_PASSWORD")
+	address := getEnvOrDefault("USER_CACHE_ADDRESS", "localhost:6379")
+	password := getEnvOrDefault("USER_CACHE_PASSWORD", "")
 	dbNumber := getIntEnvOrDefault("USER_CACHE_NUMBER", 0)
 	poolSize := getIntEnvOrDefault("USER_CACHE_POOL_SIZE", 5)
 	minIdleConns := getIntEnvOrDefault("USER_CACHE_MIN_IDLE_CONNS", 2)

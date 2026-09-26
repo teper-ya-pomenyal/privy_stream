@@ -21,56 +21,32 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	usAddress := os.Getenv("USER_SERVICE_ADDRESS")
-	if usAddress == "" {
-		log.Fatal("environment variable missing: USER_SERVICE_ADDRESS")
-	}
-
-	catalogAddress := os.Getenv("CATALOG_SERVICE_ADDRESS")
-	if catalogAddress == "" {
-		log.Fatal("environment variable missing: CATALOG_SERVICE_ADDRESS")
-	}
-	catalogWriteAddress := os.Getenv("CATALOG_WRITE_SERVICE_ADDRESS")
-	if catalogWriteAddress == "" {
-		log.Fatal("environment variable missing: CATALOG_WRITE_SERVICE_ADDRESS")
-	}
-	streamingAddress := os.Getenv("STREAMING_SERVICE_ADDRESS")
-	if streamingAddress == "" {
-		log.Fatal("environment variable missing: CATALOG_SERVICE_ADDRESS")
-	}
-
-	pka := os.Getenv("PUBLIC_KEY_ADDRESS")
-
-	trackStoragePath := os.Getenv("TRACK_STORAGE_PATH")
-	if trackStoragePath == "" {
-		log.Fatal("environment variable missing: TRACK_STORAGE_PATH")
-	}
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	// web client origins, comma-separated
 	var corsOrigins []string
-	for _, o := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
+	for _, o := range strings.Split(getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:8081,http://localhost:1420"), ",") {
 		if o = strings.TrimSpace(o); o != "" {
 			corsOrigins = append(corsOrigins, o)
 		}
 	}
-	if len(corsOrigins) == 0 {
-		log.Print("CORS_ALLOWED_ORIGINS is empty: only the desktop client is allowed")
-	}
 	corsOrigins = append(corsOrigins, tauriOrigins...)
 
 	return &Config{
-		UserServiceAddress:         usAddress,
-		CatalogServiceAddress:      catalogAddress,
-		CatalogWriteServiceAddress: catalogWriteAddress,
-		StreamingServiceAddress:    streamingAddress,
-		PubKeyAddress:              pka,
-		TrackStoragePath:           trackStoragePath,
-		Port:                       port,
+		UserServiceAddress:         getEnv("USER_SERVICE_ADDRESS", "localhost:50051"),
+		CatalogServiceAddress:      getEnv("CATALOG_SERVICE_ADDRESS", "localhost:50053"),
+		CatalogWriteServiceAddress: getEnv("CATALOG_WRITE_SERVICE_ADDRESS", "localhost:50056"),
+		StreamingServiceAddress:    getEnv("STREAMING_SERVICE_ADDRESS", "localhost:50054"),
+		PubKeyAddress:              getEnv("PUBLIC_KEY_ADDRESS", "keys/public.pem"),
+		TrackStoragePath:           getEnv("TRACK_STORAGE_PATH", "data/tracks"),
+		Port:                       getEnv("PORT", "8080"),
 		CORSAllowedOrigins:         corsOrigins,
 	}
+}
+
+func getEnv(key, def string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		log.Printf("environment variable %s is not set, using default", key)
+		return def
+	}
+	return v
 }
